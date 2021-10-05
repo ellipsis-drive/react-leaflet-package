@@ -2,11 +2,11 @@ import React from 'react';
 
 import { TileLayer } from 'react-leaflet';
 
-import ApiManager from './ApiManager';
+import SimpleApiManager from './SimpleApiManager';
 
 export class RasterLayer extends React.PureComponent {
   render = () => {
-    let url = `${ApiManager.apiUrl}/tileService/${this.props.mapId}/${this.props.timestampNumber}/${this.props.layerId}/{z}/{x}/{y}`;
+    let url = `${SimpleApiManager.apiUrl}/tileService/${this.props.mapId}/${this.props.timestampNumber}/${this.props.layerId}/{z}/{x}/{y}`;
     if (this.props.token) {
       url = url + '?token=' + this.props.token;
     }

@@ -1,10 +1,8 @@
 import React from 'react';
 
-import ViewerUtility from '../ViewerUtility';
-
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 
-import ApiManager from './ApiManager';
+import SimpleApiManager from './SimpleApiManager';
 
 const TILES_IN_CACHE = 500;
 const MAX_AMOUNT_PER_TILE = 200;
@@ -170,7 +168,7 @@ export class VectorLayer extends React.PureComponent {
       returnType: 'all',
     };
     try {
-      let result = await ApiManager.post('/geometry/ids', body, this.props.token);
+      let result = await SimpleApiManager.post('/geometry/ids', body, this.props.token);
       this.props.selectFeature({ size: result.size, feature: result.result.features[0] });
     } catch (e) {
       console.log(e);
@@ -179,6 +177,14 @@ export class VectorLayer extends React.PureComponent {
 
   render = () => {
     return <React.Fragment>{this.prepareGeometryLayer()}</React.Fragment>;
+  };
+}
+
+const createGeoJsonLayerStyle = (color, fillOpacity, weight) => {
+  return {
+    color: color ? color : '#3388ff',
+    weight: weight ? weight : 5,
+    fillOpacity: fillOpacity ? fillOpacity : 0.06,
   };
 }
 
@@ -246,7 +252,7 @@ const getGeoJsons = async (
   for (let k = 0; k < tiles.length; k += chunkSize) {
     body.tiles = tiles.slice(k, k + chunkSize);
     try {
-      let res = await ApiManager.post('/geometry/tile', body, token);
+      let res = await SimpleApiManager.post('/geometry/tile', body, token);
       result = result.concat(res);
     } catch {
       return null;
@@ -314,7 +320,7 @@ const featureToGeoJson = (feature, color, geometryLength, onFeatureClick, key, a
       <GeoJSON
         key={key}
         data={feature}
-        style={color ? ViewerUtility.createGeoJsonLayerStyle(color, alpha) : null}
+        style={color ? createGeoJsonLayerStyle(color, alpha) : null}
         interactive={onFeatureClick ? true : false}
         onEachFeature={
           onFeatureClick
@@ -330,7 +336,7 @@ const featureToGeoJson = (feature, color, geometryLength, onFeatureClick, key, a
       <GeoJSON
         key={key}
         data={feature}
-        style={color ? ViewerUtility.createGeoJsonLayerStyle(color, 1, 8) : null}
+        style={color ? createGeoJsonLayerStyle(color, 1, 8) : null}
         interactive={onFeatureClick ? true : false}
         onEachFeature={
           onFeatureClick
