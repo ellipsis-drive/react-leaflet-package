@@ -1,4 +1,4 @@
-## A small but functional npm package
+## Import Ellipsis layers in react-leaflet
 
 
 ### Install
@@ -7,11 +7,28 @@ Install using `npm install react-leaflet-ellipsis`
 
 ### Usage 
 
-In a React app, use the EllipsisRasterLayer and EllipsisVectorLayer: 
+In a React app, import the RasterLayer and VectorLayer: 
 `import { EllipsisRasterLayer } from 'react-leaflet-ellipsis'` 
 `import { EllipsisVectorLayer } from 'react-leaflet-ellipsis'` 
 
-You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.
+### Example
+You can use RasterLayer and VectorLayer within a <map/> component.
+
+```js
+<Map>
+ <RasterLayer
+  mapId={mapId}
+  timestampNumber={timestampNumber}
+  layerId={layerId}
+  maxZoom={maxZoom}
+ />
+ <VectorLayer
+  mapId={mapId}
+  layerId={layerId}
+  maxZoom={maxZoom}
+ />
+</Map>
+```
 
 #### RasterLayer props
 
@@ -39,4 +56,11 @@ You can do a https://api.ellipsis-drive.com/metadata POST request for a particul
 | maxMbPerTile        | the maximum mb to load per tile. Default 16mb |
 | maxTilesInCache        | The number of tiles to keep in cache. Default 500|
 | maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200|
+
+
+
+###Getting possible props
+You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.
+
+See https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20metadata for full Ellipsis Drive API documentation.
 
