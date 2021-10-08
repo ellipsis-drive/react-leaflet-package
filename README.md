@@ -108,9 +108,10 @@ expires: number //expiration time in milliseconds
 | includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
 
 **return value**
+
 It returns JSON, which depends on the type of map.
 
-###Getting possible props
+### Getting possible props
 You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.
 
 See https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20metadata for full Ellipsis Drive API documentation.
