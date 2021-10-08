@@ -122,7 +122,6 @@ export class VectorLayer extends React.PureComponent {
 
     tilesParam = tilesParam.filter((x) => x);
     //prepare other parameters
-
     if (tilesParam.length > 0) {
       //get addtional elements
       this.changed = true;
@@ -217,7 +216,6 @@ const boundsToTiles = (bounds, zoom) => {
     }
     x = x + 1;
   }
-
   return tiles;
 };
 
@@ -430,18 +428,17 @@ const featureToGeoJson = (feature, color, geometryLength, onFeatureClick, key, a
 };
 
 const getLeafletMapBounds = (leafletMap) => {
-  if (leafletMap && leafletMap.current && leafletMap.current.viewport && leafletMap.current.viewport.zoom) {
-    let screenBounds = leafletMap.current.leafletElement.getBounds();
-    let bounds = {
-      xMin: screenBounds.getWest(),
-      xMax: screenBounds.getEast(),
-      yMin: screenBounds.getSouth(),
-      yMax: screenBounds.getNorth(),
-    };
+  if(!leafletMap || !leafletMap._zoom) return;
 
-    let zoom = leafletMap.current.viewport.zoom;
+  const screenBounds = leafletMap.getBounds();
 
-    return { bounds: bounds, zoom: zoom };
-  }
+  let bounds = {
+    xMin: screenBounds.getWest(),
+    xMax: screenBounds.getEast(),
+    yMin: screenBounds.getSouth(),
+    yMax: screenBounds.getNorth(),
+  };
+
+  return { bounds: bounds, zoom: leafletMap._zoom };
 };
 export default VectorLayer;

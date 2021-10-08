@@ -48,6 +48,7 @@ You can use RasterLayer and VectorLayer within a <map/> component.
 | mapId        | id of the map|
 | layerId     | id of the layer |
 | maxZoom        | maxZoomlevel of the layer|
+| mapRef | a reference* to the MapContainer |
 | selectFeature        | a function to run on feature click, with as argument the clicked feature|
 | token        | token of the user (optional)|
 | styleId        | id of the layer style (optional)|
@@ -57,7 +58,18 @@ You can use RasterLayer and VectorLayer within a <map/> component.
 | maxTilesInCache        | The number of tiles to keep in cache. Default 500|
 | maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200|
 
+*Passing a reference to the map can be done like this:
+```jsx
+const MyComponent() => {
+    const [map, setMap] = useState();
+    return(
+        <MapContainer whenCreated={setMap} ...>
+            <EllipsisVectorLayer mapRef={map} ... />
+        </MapContainer>
+    );
+}
 
+```
 
 ###Getting possible props
 You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.
