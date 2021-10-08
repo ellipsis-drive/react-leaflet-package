@@ -4,10 +4,6 @@ import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 
 import EllipsisApi from './EllipsisApi';
 
-const TILES_IN_CACHE = 500;
-const MAX_AMOUNT_PER_TILE = 200;
-const MAX_MB_PER_TILE = 16000000;
-
 export class EllipsisVectorLayer extends React.PureComponent {
   setNewViewportTimer = null;
 
@@ -47,9 +43,7 @@ export class EllipsisVectorLayer extends React.PureComponent {
     if (!viewport) {
       return;
     }
-    let maxZoom = this.props.maxZoom ? this.props.maxZoom : 21;
-
-    let zoom = Math.min(maxZoom, viewport.zoom - 2);
+    let zoom = Math.min(this.props.maxZoom, viewport.zoom - 2);
     zoom = Math.max(zoom, 0);
     let tiles = boundsToTiles(viewport.bounds, zoom);
     this.tiles = tiles;
@@ -79,9 +73,8 @@ export class EllipsisVectorLayer extends React.PureComponent {
     let tiles = this.tiles;
 
     //clear cache
-    let tilesCache = this.props.maxTilesInCache ? this.props.maxTilesInCache : TILES_IN_CACHE;
     let currentLength = Object.keys(this.geometryLayer.tiles).length;
-    if (currentLength > tilesCache) {
+    if (currentLength > this.props.maxTilesInCache) {
       let dates = Object.keys(this.geometryLayer.tiles).map((k) => this.geometryLayer.tiles[k].date);
       dates.sort();
       let clipValue = dates[9];
@@ -104,15 +97,11 @@ export class EllipsisVectorLayer extends React.PureComponent {
         pageStart = this.geometryLayer.tiles[tileId].nextPageStart;
       }
 
-      let maxAmount = this.props.maxVectorsPerTile ? this.props.maxVectorsPerTile : MAX_AMOUNT_PER_TILE;
-
-      let maxMB = this.props.maxMbPerTile ? this.props.maxMbPerTile : MAX_MB_PER_TILE;
-
       if (
         !this.geometryLayer.tiles[tileId] ||
         (pageStart &&
-          this.geometryLayer.tiles[tileId].amount < maxAmount &&
-          this.geometryLayer.tiles[tileId].size < maxMB)
+          this.geometryLayer.tiles[tileId].amount < this.props.maxVectorsPerTile &&
+          this.geometryLayer.tiles[tileId].size < this.props.maxMbPerTile)
       ) {
         return { tileId: t, pageStart: pageStart };
       }
@@ -130,8 +119,11 @@ export class EllipsisVectorLayer extends React.PureComponent {
         tilesParam,
         this.props.token,
         this.props.mapId,
+        Math.min(3000, this.props.pageSize),
         this.props.layerId,
         this.props.styleId,
+        this.props.lineWidth,
+        this.props.pointRadius,
         this.selectFeature,
         this.props.filter,
         now,
@@ -224,8 +216,11 @@ const getGeoJsons = async (
   tiles,
   token,
   mapId,
+  pageSize,
   layerId,
   styleId,
+  lineWidth,
+  pointRadius,
   selectFeature,
   filter,
   date,
@@ -239,7 +234,7 @@ const getGeoJsons = async (
     returnType: returnType,
     layerId: layerId,
     zip: true,
-    limit: 200,
+    pageSize: pageSize,
     styleId: styleId,
     propertyFilter: filter,
   };
@@ -277,6 +272,8 @@ const getGeoJsons = async (
       let newElements = featureToGeoJson(
         feature,
         feature.properties.color,
+        lineWidth,
+        pointRadius,
         500,
         selectFeature,
         feature.properties.id + '_' + returnType + '_' + styleId
@@ -288,7 +285,7 @@ const getGeoJsons = async (
   }
 };
 
-const featureToGeoJson = (feature, color, geometryLength, onFeatureClick, key, asMarker, forceColor = false) => {
+const featureToGeoJson = (feature, color, width, pointRadius, geometryLength, onFeatureClick, key, asMarker, forceColor = false) => {
   let alpha;
 
   if (color) {
@@ -318,7 +315,7 @@ const featureToGeoJson = (feature, color, geometryLength, onFeatureClick, key, a
       <GeoJSON
         key={key}
         data={feature}
-        style={color ? createGeoJsonLayerStyle(color, alpha) : null}
+        style={color ? createGeoJsonLayerStyle(color, alpha, width) : null}
         interactive={onFeatureClick ? true : false}
         onEachFeature={
           onFeatureClick
@@ -346,7 +343,7 @@ const featureToGeoJson = (feature, color, geometryLength, onFeatureClick, key, a
       />,
     ];
   } else if (type === 'Point' || type === 'MultiPoint') {
-    let radius = Math.min(150 / geometryLength ** 0.5, 15);
+    let radius = Math.min(150 / geometryLength ** 0.5, pointRadius);
 
     let coords = feature.geometry.coordinates;
     let isMultiMarker = Array.isArray(coords) && Array.isArray(coords[0]);
@@ -441,4 +438,17 @@ const getLeafletMapBounds = (leafletMap) => {
 
   return { bounds: bounds, zoom: leafletMap._zoom };
 };
+
+
+
+EllipsisVectorLayer.defaultProps = {
+  pageSize: 25,
+  maxZoom: 21,
+  lineWidth: 5,
+  pointRadius: 15,
+  maxVectorsPerTile: 200,
+  maxMbPerTile: 16000000,
+  maxTilesInCache: 500
+}
+
 export default EllipsisVectorLayer;

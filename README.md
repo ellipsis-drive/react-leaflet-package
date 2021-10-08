@@ -60,18 +60,21 @@ useEffect(() => {
 
 | Name        | Description | 
 | ----------- | ----------- |
-| mapId        | id of the map|
-| layerId     | id of the layer |
-| maxZoom        | maxZoomlevel of the layer|
-| mapRef | a reference* to the MapContainer |
-| selectFeature        | a function to run on feature click, with as argument the clicked feature|
-| token        | token of the user (optional)|
-| styleId        | id of the layer style (optional)|
-| centerPoints        | boolean whether to render only center points. Default false|
-| filter        | a property filter to use (Optional)|
-| maxMbPerTile        | the maximum mb to load per tile. Default 16mb |
-| maxTilesInCache        | The number of tiles to keep in cache. Default 500|
-| maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200|
+| mapId        | Id of the map |
+| layerId     | Id of the layer |
+| maxZoom        | maxZoomlevel of the layer |
+| mapRef | A reference* to the MapContainer |
+| selectFeature        | A function to run on feature click, with as argument the clicked feature |
+| token        | (Optional) Token of the user |
+| styleId        | (Optional) Id of the layer style|
+| filter        | (Optional) A property filter to use|
+| centerPoints        | Boolean whether to render only center points. Default false. |
+| pageSize | Size to retreive per step. Default 25, max 3000. |
+| maxMbPerTile        | The maximum mb to load per tile. Default 16mb. |
+| maxTilesInCache        | The number of tiles to keep in cache. Default 500. |
+| maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200. |
+| pointRadius | The radius of the points in the layer. Default 15. |
+| lineWidth | The width/weight of the lines in the layer. Default 5. |
 
 *Passing a reference to the map can be done like this:
 ```jsx
