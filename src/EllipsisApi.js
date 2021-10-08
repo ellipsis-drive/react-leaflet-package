@@ -81,17 +81,17 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 const EllipsisApi = {
     apiUrl: apiUrl,
     post: (url, body, user) => {
-        return apiManagerFetch('POST', url, body, user);
+        return ellipsisApiManagerFetch('POST', url, body, user);
     },
     login: (username, password) => {
-        return apiManagerFetch('POST', '/account/login', {username, password});
+        return ellipsisApiManagerFetch('POST', '/account/login', {username, password});
     },
     getMetadata: (mapId, includeDeleted) => {
         let body;
         if(includeDeleted) body = {mapId, includeDeleted};
         else body = {mapId};
 
-        return apiManagerFetch('POST', '/metadata', body);
+        return ellipsisApiManagerFetch('POST', '/metadata', body);
     }
 }
 
