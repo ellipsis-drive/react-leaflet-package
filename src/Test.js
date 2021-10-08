@@ -1,17 +1,17 @@
-import RasterLayer from './lib/components/RasterLayer';
-import VectorLayer from './lib/components/VectorLayer';
-import './App.css';
+import RasterLayer from './EllipsisRasterLayer';
+import VectorLayer from './EllipsisVectorLayer';
+import './Test.css';
 import 'leaflet/dist/leaflet.css';
 
-import ApiManager from './lib/components/ApiManager';
+import ApiManager from './EllipsisApi';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const position = [51.505, -0.09]
 
 
-function App() {
+function Test() {
   const [map,setMap] = useState();
 
   const username = process.env.REACT_APP_USERNAME;
@@ -25,8 +25,6 @@ function App() {
     <>
     <h1 style={{textAlign:'center', margin:'20px'}}>Below is a test of the map.</h1>
     <MapContainer whenCreated={setMap} style={{height:'70vh', width:'80vw', margin: '0 auto'}} center={position} zoom={13} scrollWheelZoom={true}>
-      
-      
       <TileLayer 
         noWrap={true}
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -38,12 +36,12 @@ function App() {
         token={token}
         mapRef={map}
       />
-      {/* <RasterLayer 
+      <RasterLayer 
         mapId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
         layerId='6fde37d3-3666-40ef-b594-890a4e00a2be'
         timestampNumber={0}
         token={token}
-      /> */}
+      />
     </MapContainer>
     </>
   );
@@ -51,7 +49,7 @@ function App() {
 
 
 
-export default App;
+export default Test;
 
 
 

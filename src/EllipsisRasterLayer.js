@@ -2,11 +2,11 @@ import React from 'react';
 
 import { TileLayer } from 'react-leaflet';
 
-import ApiManager from './ApiManager';
+import EllipsisApi from './EllipsisApi';
 
-export class RasterLayer extends React.PureComponent {
+export class EllipsisRasterLayer extends React.PureComponent {
   render = () => {
-    let url = `${ApiManager.apiUrl}/tileService/${this.props.mapId}/${this.props.timestampNumber}/${this.props.layerId}/{z}/{x}/{y}`;
+    let url = `${EllipsisApi.apiUrl}/tileService/${this.props.mapId}/${this.props.timestampNumber}/${this.props.layerId}/{z}/{x}/{y}`;
     if (this.props.token) {
       url = url + '?token=' + this.props.token;
     }
@@ -24,4 +24,4 @@ export class RasterLayer extends React.PureComponent {
   };
 }
 
-export default RasterLayer;
+export default EllipsisRasterLayer;

@@ -2,13 +2,13 @@ import React from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 
-import ApiManager from './ApiManager';
+import EllipsisApi from './EllipsisApi';
 
 const TILES_IN_CACHE = 500;
 const MAX_AMOUNT_PER_TILE = 200;
 const MAX_MB_PER_TILE = 16000000;
 
-export class VectorLayer extends React.PureComponent {
+export class EllipsisVectorLayer extends React.PureComponent {
   setNewViewportTimer = null;
 
   constructor(props, context) {
@@ -167,7 +167,7 @@ export class VectorLayer extends React.PureComponent {
       returnType: 'all',
     };
     try {
-      let result = await ApiManager.post('/geometry/ids', body, this.props.token);
+      let result = await EllipsisApi.post('/geometry/ids', body, this.props.token);
       this.props.selectFeature({ size: result.size, feature: result.result.features[0] });
     } catch (e) {
       console.log(e);
@@ -250,7 +250,7 @@ const getGeoJsons = async (
   for (let k = 0; k < tiles.length; k += chunkSize) {
     body.tiles = tiles.slice(k, k + chunkSize);
     try {
-      let res = await ApiManager.post('/geometry/tile', body, token);
+      let res = await EllipsisApi.post('/geometry/tile', body, token);
       result = result.concat(res);
     } catch {
       return null;
@@ -441,4 +441,4 @@ const getLeafletMapBounds = (leafletMap) => {
 
   return { bounds: bounds, zoom: leafletMap._zoom };
 };
-export default VectorLayer;
+export default EllipsisVectorLayer;

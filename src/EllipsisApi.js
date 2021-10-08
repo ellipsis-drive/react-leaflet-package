@@ -9,7 +9,7 @@ function CustomError(status, message) {
     this.status = status;
 }
 
-async function apiManagerFetch(method, url, body, user) {
+async function ellipsisApiManagerFetch(method, url, body, user) {
     let headers = {};
     let urlAddition = '';
 
@@ -78,7 +78,7 @@ async function apiManagerFetch(method, url, body, user) {
     });
 }
 
-const ApiManager = {
+const EllipsisApi = {
     apiUrl: apiUrl,
     post: (url, body, user) => {
         return apiManagerFetch('POST', url, body, user);
@@ -95,4 +95,4 @@ const ApiManager = {
     }
 }
 
-export default ApiManager;
+export default EllipsisApi;
