@@ -2,7 +2,7 @@ import React from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 
-import SimpleApiManager from './SimpleApiManager';
+import ApiManager from './ApiManager';
 
 const TILES_IN_CACHE = 500;
 const MAX_AMOUNT_PER_TILE = 200;
@@ -167,7 +167,7 @@ export class VectorLayer extends React.PureComponent {
       returnType: 'all',
     };
     try {
-      let result = await SimpleApiManager.post('/geometry/ids', body, this.props.token);
+      let result = await ApiManager.post('/geometry/ids', body, this.props.token);
       this.props.selectFeature({ size: result.size, feature: result.result.features[0] });
     } catch (e) {
       console.log(e);
@@ -250,7 +250,7 @@ const getGeoJsons = async (
   for (let k = 0; k < tiles.length; k += chunkSize) {
     body.tiles = tiles.slice(k, k + chunkSize);
     try {
-      let res = await SimpleApiManager.post('/geometry/tile', body, token);
+      let res = await ApiManager.post('/geometry/tile', body, token);
       result = result.concat(res);
     } catch {
       return null;
