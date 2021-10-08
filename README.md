@@ -93,6 +93,7 @@ const MyComponent() => {
 | username | The username of your ellipsis-drive account |
 | password | The password of your ellipsis-drive account |
 | validFor | (Optional) The number of second the access token will be valid for. Default 86400 (24 hours). |
+
 **return value**
 ```ts
 token: string //token to use in other api calls
