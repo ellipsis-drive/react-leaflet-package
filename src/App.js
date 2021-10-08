@@ -3,9 +3,10 @@ import VectorLayer from './lib/components/VectorLayer';
 import './App.css';
 import 'leaflet/dist/leaflet.css';
 
+import ApiManager from './lib/components/ApiManager';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const position = [51.505, -0.09]
 
@@ -13,7 +14,12 @@ const position = [51.505, -0.09]
 function App() {
   const [map,setMap] = useState();
 
-  const token = process.env.REACT_APP_SECRET_TOKEN;
+  const username = process.env.REACT_APP_USERNAME;
+  const password = process.env.REACT_APP_PASSWORD;
+  let token;
+  ApiManager.login(username, password).then((res) => {
+    token=res;
+  });
 
   return (
     <>
