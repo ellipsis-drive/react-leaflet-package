@@ -3,7 +3,7 @@ import EllipsisVectorLayer from './EllipsisVectorLayer';
 import './Test.css';
 import 'leaflet/dist/leaflet.css';
 
-import ApiManager from './EllipsisApi';
+import EllipsisApi from './EllipsisApi';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { useEffect, useState } from 'react';
@@ -18,11 +18,11 @@ function Test() {
   const password = process.env.REACT_APP_PASSWORD;
   let token;
   useEffect(() => {
-    ApiManager.login(username, password).then((res) => {
+    EllipsisApi.login(username, password).then((res) => {
       console.log(res)
       token = res.token;
     });
-    ApiManager.getMetadata('0ec49fb8-f577-45de-8e4f-6243fdc62908').then((res) => {
+    EllipsisApi.getMetadata('0ec49fb8-f577-45de-8e4f-6243fdc62908').then((res) => {
       console.log(res);
     });
   }, [])

@@ -10,11 +10,12 @@ Install using `npm install react-leaflet-ellipsis`
 In a React app, import the RasterLayer and VectorLayer: 
 `import { EllipsisRasterLayer } from 'react-leaflet-ellipsis'` 
 `import { EllipsisVectorLayer } from 'react-leaflet-ellipsis'` 
+`import { EllipsisApi } from 'react-leaflet-ellipsis'`
 
 ### Example
 You can use RasterLayer and VectorLayer within a <map/> component.
 
-```js
+```jsx
 <Map>
  <RasterLayer
   mapId={mapId}
@@ -30,6 +31,20 @@ You can use RasterLayer and VectorLayer within a <map/> component.
 </Map>
 ```
 
+To login or request metadata of maps you can use the functions available in `EllipsisApi`.
+```js
+useEffect(() => {
+    EllipsisApi.login(username, password).then((response) => {
+        console.log(response)
+        token = response.token;
+        expires = response.expires;
+    });
+    EllipsisApi.getMetadata(mapId).then((response) => {
+        console.log(response);
+    });
+}, []);
+```
+
 #### RasterLayer props
 
 | Name        | Description |
@@ -41,7 +56,7 @@ You can use RasterLayer and VectorLayer within a <map/> component.
 | token        | token of the user (optional)|
 
 
-#### VectorLayer
+#### VectorLayer props
 
 | Name        | Description | 
 | ----------- | ----------- |
@@ -70,6 +85,29 @@ const MyComponent() => {
 }
 
 ```
+
+#### EllipsisApi.login description
+**parameters**
+| name | description | 
+| -- | -- |
+| username | The username of your ellipsis-drive account |
+| password | The password of your ellipsis-drive account |
+| validFor | (Optional) The number of second the access token will be valid for. Default 86400 (24 hours). |
+**return value**
+```ts
+token: string //token to use in other api calls
+expires: number //expiration time in milliseconds
+```
+
+#### EllipsisApi.getMetadata description
+**parameters**
+| name | description | 
+| -- | -- |
+| mapId | The map or shape id of the project. |
+| includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
+
+**return value**
+It returns JSON, which depends on the type of map.
 
 ###Getting possible props
 You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.
