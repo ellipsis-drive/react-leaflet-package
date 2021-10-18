@@ -123,7 +123,7 @@ export class EllipsisVectorLayer extends React.PureComponent {
         this.props.layerId,
         this.props.styleId,
         this.props.lineWidth,
-        this.props.pointRadius,
+        this.props.radius,
         this.selectFeature,
         this.props.filter,
         now,
@@ -220,7 +220,7 @@ const getGeoJsons = async (
   layerId,
   styleId,
   lineWidth,
-  pointRadius,
+  radius,
   selectFeature,
   filter,
   date,
@@ -273,7 +273,7 @@ const getGeoJsons = async (
         feature,
         feature.properties.color,
         lineWidth,
-        pointRadius,
+        radius,
         500,
         selectFeature,
         feature.properties.id + '_' + returnType + '_' + styleId
@@ -285,7 +285,7 @@ const getGeoJsons = async (
   }
 };
 
-const featureToGeoJson = (feature, color, width, pointRadius, geometryLength, onFeatureClick, key, asMarker, forceColor = false) => {
+const featureToGeoJson = (feature, color, width, radius, geometryLength, onFeatureClick, key, asMarker, forceColor = false) => {
   let alpha;
 
   if (color) {
@@ -343,7 +343,7 @@ const featureToGeoJson = (feature, color, width, pointRadius, geometryLength, on
       />,
     ];
   } else if (type === 'Point' || type === 'MultiPoint') {
-    let radius = Math.min(150 / geometryLength ** 0.5, pointRadius);
+    let radius = Math.min(150 / geometryLength ** 0.5, radius);
 
     let coords = feature.geometry.coordinates;
     let isMultiMarker = Array.isArray(coords) && Array.isArray(coords[0]);
@@ -445,7 +445,7 @@ EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
   maxZoom: 21,
   lineWidth: 5,
-  pointRadius: 15,
+  radius: 15,
   maxVectorsPerTile: 200,
   maxMbPerTile: 16000000,
   maxTilesInCache: 500

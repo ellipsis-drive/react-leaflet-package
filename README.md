@@ -17,13 +17,13 @@ You can use RasterLayer and VectorLayer within a <map/> component.
 
 ```jsx
 <Map>
- <RasterLayer
+ <EllipsisRasterLayer 
   mapId={mapId}
-  timestampNumber={timestampNumber}
-  layerId={layerId}
+  visualizationId={visualizationId}
+  captureId={captureId}
   maxZoom={maxZoom}
  />
- <VectorLayer
+ <EllipsisVectorLayer
   mapId={mapId}
   layerId={layerId}
   maxZoom={maxZoom}
@@ -50,8 +50,8 @@ useEffect(() => {
 | Name        | Description |
 | ----------- | -----------|
 | mapId        | id of the map|
-| timestampNumber     | number of the timestamp |
-| layerId     | id of the layer |
+| captureId     | id of the timestamp |
+| visualizationId     | id of the layer |
 | maxZoom        | maxZoomlevel of the layer|
 | token        | token of the user (optional)|
 
@@ -73,7 +73,7 @@ useEffect(() => {
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb. |
 | maxTilesInCache        | The number of tiles to keep in cache. Default 500. |
 | maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200. |
-| pointRadius | The radius of the points in the layer. Default 15. |
+| radius | The radius of the points in the layer. Default 15. |
 | lineWidth | The width/weight of the lines in the layer. Default 5. |
 
 *Passing a reference to the map can be done like this:
