@@ -1,9 +1,9 @@
-import EllipsisRasterLayer from './EllipsisRasterLayer';
-import EllipsisVectorLayer from './EllipsisVectorLayer';
+import EllipsisRasterLayer from './lib/EllipsisRasterLayer';
+import EllipsisVectorLayer from './lib/EllipsisVectorLayer';
 import './Test.css';
 import 'leaflet/dist/leaflet.css';
 
-import EllipsisApi from './EllipsisApi';
+import EllipsisApi from './lib/EllipsisApi';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { useEffect, useRef, useState } from 'react';
