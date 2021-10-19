@@ -2,13 +2,20 @@
   "name": "react-leaflet-ellipsis",
   "description": "Use Ellipsis Drive layers in react-leaflet",
   "author": "Daniel van der Maas",
-  "keywords": ["Ellipsis", "Ellipsis Drive", "react leaflet"],
+  "keywords": [
+    "Ellipsis",
+    "Ellipsis Drive",
+    "react leaflet"
+  ],
   "version": "0.0.0",
   "private": false,
   "main": "dist/index.js",
   "module": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "files": [ "dist", "README.md" ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ellipsis-drive-internal/react-leaflet-package.git"
@@ -18,7 +25,9 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "leaflet": "^1.7.1",
     "node-sass": "^5.0.0",
+    "react-leaflet": "^3.2.1",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
@@ -34,18 +43,11 @@
       "react-app/jest"
     ]
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
