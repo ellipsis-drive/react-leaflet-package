@@ -18,13 +18,13 @@ You can use RasterLayer and VectorLayer within a <map/> component.
 ```jsx
 <Map>
  <EllipsisRasterLayer 
-  mapId={mapId}
+  blockId={blockId}
   visualizationId={visualizationId}
   captureId={captureId}
   maxZoom={maxZoom}
  />
  <EllipsisVectorLayer
-  mapId={mapId}
+  blockId={blockId}
   layerId={layerId}
   maxZoom={maxZoom}
  />
@@ -49,7 +49,7 @@ useEffect(() => {
 
 | Name        | Description |
 | ----------- | -----------|
-| mapId        | id of the map|
+| blockId        | id of the block|
 | captureId     | id of the timestamp |
 | visualizationId     | id of the layer |
 | maxZoom        | maxZoomlevel of the layer|
@@ -60,7 +60,7 @@ useEffect(() => {
 
 | Name        | Description | 
 | ----------- | ----------- |
-| mapId        | Id of the map |
+| blockId        | Id of the block |
 | layerId     | Id of the layer |
 | maxZoom        | maxZoomlevel of the layer |
 | mapRef | A reference* to the MapContainer |
@@ -72,7 +72,7 @@ useEffect(() => {
 | pageSize | Size to retreive per step. Default 25, max 3000. |
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb. |
 | maxTilesInCache        | The number of tiles to keep in cache. Default 500. |
-| maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200. |
+| maxFeaturesPerTile        | The maximum number of vectors to load per tile. Default 200. |
 | radius | The radius of the points in the layer. Default 15. |
 | lineWidth | The width/weight of the lines in the layer. Default 5. |
 
@@ -107,12 +107,12 @@ expires: number //expiration time in milliseconds
 **parameters**
 | name | description | 
 | -- | -- |
-| mapId | The map or shape id of the project. |
+| blockId | The block or shape id of the project. |
 | includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
 
 **return value**
 
-It returns JSON, which depends on the type of map.
+It returns JSON, which depends on the type of block.
 
 ### Getting possible props
 You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.

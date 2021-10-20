@@ -100,7 +100,7 @@ export class EllipsisVectorLayer extends React.PureComponent {
       if (
         !this.geometryLayer.tiles[tileId] ||
         (pageStart &&
-          this.geometryLayer.tiles[tileId].amount < this.props.maxVectorsPerTile &&
+          this.geometryLayer.tiles[tileId].amount < this.props.maxFeaturesPerTile &&
           this.geometryLayer.tiles[tileId].size < this.props.maxMbPerTile)
       ) {
         return { tileId: t, pageStart: pageStart };
@@ -118,7 +118,7 @@ export class EllipsisVectorLayer extends React.PureComponent {
         this.geometryLayer,
         tilesParam,
         this.props.token,
-        this.props.mapId,
+        this.props.blockId,
         Math.min(3000, this.props.pageSize),
         this.props.layerId,
         this.props.styleId,
@@ -153,7 +153,7 @@ export class EllipsisVectorLayer extends React.PureComponent {
   selectFeature = async (feature) => {
     console.log('SELECTING');
     let body = {
-      mapId: this.props.mapId,
+      mapId: this.props.blockId,
       layerId: this.props.layerId,
       geometryIds: [feature.properties.id],
       returnType: 'all',
@@ -446,7 +446,7 @@ EllipsisVectorLayer.defaultProps = {
   maxZoom: 21,
   lineWidth: 5,
   radius: 15,
-  maxVectorsPerTile: 200,
+  maxFeaturesPerTile: 200,
   maxMbPerTile: 16000000,
   maxTilesInCache: 500
 }

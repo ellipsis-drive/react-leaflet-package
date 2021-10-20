@@ -37,13 +37,13 @@ function Test() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <EllipsisVectorLayer
-        mapId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
+        blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
         layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
         token={token.current}
         mapRef={map}
       />
       <EllipsisRasterLayer 
-        mapId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
+        blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
         visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'
         captureId={0}
         token={token.current}

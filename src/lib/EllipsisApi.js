@@ -86,10 +86,10 @@ const EllipsisApi = {
     login: (username, password) => {
         return ellipsisApiManagerFetch('POST', '/account/login', {username, password});
     },
-    getMetadata: (mapId, includeDeleted) => {
+    getMetadata: (blockId, includeDeleted) => {
         let body;
-        if(includeDeleted) body = {mapId, includeDeleted};
-        else body = {mapId};
+        if(includeDeleted) body = {mapId: blockId, includeDeleted};
+        else body = {mapId: blockId};
 
         return ellipsisApiManagerFetch('POST', '/metadata', body);
     }
