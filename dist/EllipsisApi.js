@@ -93,13 +93,13 @@ const EllipsisApi = {
       password
     });
   },
-  getMetadata: (mapId, includeDeleted) => {
+  getMetadata: (blockId, includeDeleted) => {
     let body;
     if (includeDeleted) body = {
-      mapId,
+      mapId: blockId,
       includeDeleted
     };else body = {
-      mapId
+      mapId: blockId
     };
     return ellipsisApiManagerFetch('POST', '/metadata', body);
   }

@@ -22,14 +22,14 @@ class EllipsisRasterLayer extends _react.default.PureComponent {
     super(...arguments);
 
     _defineProperty(this, "render", () => {
-      let url = "".concat(_EllipsisApi.default.apiUrl, "/tileService/").concat(this.props.mapId, "/").concat(this.props.captureId, "/").concat(this.props.visualizationId, "/{z}/{x}/{y}");
+      let url = "".concat(_EllipsisApi.default.apiUrl, "/tileService/").concat(this.props.blockId, "/").concat(this.props.captureId, "/").concat(this.props.visualizationId, "/{z}/{x}/{y}");
 
       if (this.props.token) {
         url = url + '?token=' + this.props.token;
       }
 
       return /*#__PURE__*/_react.default.createElement(_reactLeaflet.TileLayer, {
-        key: this.props.mapId + '_' + this.props.captureId + '_' + this.props.visualizationId,
+        key: this.props.blockId + '_' + this.props.captureId + '_' + this.props.visualizationId,
         url: url,
         tileSize: 256,
         noWrap: true,

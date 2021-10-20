@@ -118,7 +118,7 @@ class EllipsisVectorLayer extends _react.default.PureComponent {
           pageStart = this.geometryLayer.tiles[tileId].nextPageStart;
         }
 
-        if (!this.geometryLayer.tiles[tileId] || pageStart && this.geometryLayer.tiles[tileId].amount < this.props.maxVectorsPerTile && this.geometryLayer.tiles[tileId].size < this.props.maxMbPerTile) {
+        if (!this.geometryLayer.tiles[tileId] || pageStart && this.geometryLayer.tiles[tileId].amount < this.props.maxFeaturesPerTile && this.geometryLayer.tiles[tileId].size < this.props.maxMbPerTile) {
           return {
             tileId: t,
             pageStart: pageStart
@@ -132,7 +132,7 @@ class EllipsisVectorLayer extends _react.default.PureComponent {
       if (tilesParam.length > 0) {
         //get addtional elements
         this.changed = true;
-        await getGeoJsons(this.geometryLayer, tilesParam, this.props.token, this.props.mapId, Math.min(3000, this.props.pageSize), this.props.layerId, this.props.styleId, this.props.lineWidth, this.props.radius, this.selectFeature, this.props.filter, now, this.props.centerPoints);
+        await getGeoJsons(this.geometryLayer, tilesParam, this.props.token, this.props.blockId, Math.min(3000, this.props.pageSize), this.props.layerId, this.props.styleId, this.props.lineWidth, this.props.radius, this.selectFeature, this.props.filter, now, this.props.centerPoints);
       }
     });
 
@@ -157,7 +157,7 @@ class EllipsisVectorLayer extends _react.default.PureComponent {
     _defineProperty(this, "selectFeature", async feature => {
       console.log('SELECTING');
       let body = {
-        mapId: this.props.mapId,
+        mapId: this.props.blockId,
         layerId: this.props.layerId,
         geometryIds: [feature.properties.id],
         returnType: 'all'
@@ -423,7 +423,7 @@ EllipsisVectorLayer.defaultProps = {
   maxZoom: 21,
   lineWidth: 5,
   radius: 15,
-  maxVectorsPerTile: 200,
+  maxFeaturesPerTile: 200,
   maxMbPerTile: 16000000,
   maxTilesInCache: 500
 };
