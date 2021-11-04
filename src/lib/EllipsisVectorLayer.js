@@ -151,7 +151,6 @@ export class EllipsisVectorLayer extends React.PureComponent {
   };
 
   selectFeature = async (feature) => {
-    console.log('SELECTING');
     let body = {
       mapId: this.props.blockId,
       layerId: this.props.layerId,
@@ -385,7 +384,7 @@ const featureToGeoJson = (feature, color, width, radius, geometryLength, onFeatu
       }
     } else {
       if (asMarker) {
-        element = (
+        element = [
           <Marker
             key={key}
             position={[coords[1], coords[0]]}
@@ -398,7 +397,7 @@ const featureToGeoJson = (feature, color, width, radius, geometryLength, onFeatu
                 : null
             }
           />
-        );
+        ];
       } else {
         element = [
           <CircleMarker
