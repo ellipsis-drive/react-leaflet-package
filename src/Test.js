@@ -22,6 +22,9 @@ function Test() {
       console.log(res)
       token.current = res.token;
     });
+    EllipsisApi.getMetadata('1a24a1ee-7f39-4d21-b149-88df5a3b633a').then((res) => {
+      console.log(res);
+    });
     EllipsisApi.getMetadata('0ec49fb8-f577-45de-8e4f-6243fdc62908').then((res) => {
       console.log(res);
     });
@@ -39,6 +42,7 @@ function Test() {
       <EllipsisVectorLayer
         blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
         layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
+        styleId='a30d5d0e-26a3-43a7-9d23-638cef7600c4'
         token={token.current}
         mapRef={map}
       />
