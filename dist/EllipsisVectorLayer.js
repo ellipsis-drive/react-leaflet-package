@@ -155,7 +155,6 @@ class EllipsisVectorLayer extends _react.default.PureComponent {
     });
 
     _defineProperty(this, "selectFeature", async feature => {
-      console.log('SELECTING');
       let body = {
         mapId: this.props.blockId,
         layerId: this.props.layerId,
@@ -375,14 +374,14 @@ const featureToGeoJson = function featureToGeoJson(feature, color, width, radius
       }
     } else {
       if (asMarker) {
-        element = /*#__PURE__*/_react.default.createElement(_reactLeaflet.Marker, {
+        element = [/*#__PURE__*/_react.default.createElement(_reactLeaflet.Marker, {
           key: key,
           position: [coords[1], coords[0]],
           interactive: onFeatureClick ? true : false,
           onClick: onFeatureClick ? () => {
             onFeatureClick(feature);
           } : null
-        });
+        })];
       } else {
         element = [/*#__PURE__*/_react.default.createElement(_reactLeaflet.CircleMarker, {
           center: [coords[1], coords[0]],
