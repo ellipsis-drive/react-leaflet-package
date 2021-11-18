@@ -39,11 +39,17 @@ function Test() {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <EllipsisVectorLayer
+      {/* <EllipsisVectorLayer
         blockId='b8468235-31b5-4959-91a4-0e52a1d4feb6'
         layerId='44be2542-d20d-457b-b003-698d048d2c6c'
         radius={3}
         mapRef={map}
+      /> */}
+
+      <EllipsisVectorLayer
+        blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
+        layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
+        onFeatureClick={(feature, layer) => console.log(feature)}
       />
 
       {/* <EllipsisVectorLayer
