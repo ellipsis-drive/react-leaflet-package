@@ -6,6 +6,7 @@ import EllipsisApi from './EllipsisApi';
 
 const EllipsisVectorLayer = props => {
 
+  //When set to true, it'll reset to false after a state change.
   let stateIsChanging = false;
 
   const [state, setState] = useState({
@@ -28,8 +29,9 @@ const EllipsisVectorLayer = props => {
   }: {});
 
   useEffect(() => {
+    //This'll ensure that another state change happens when needed.
     handleViewportUpdate();
-  }, [state])
+  }, [state]);
 
   const handleViewportUpdate = async () => {
     const viewport = getMapBounds();
@@ -62,8 +64,6 @@ const EllipsisVectorLayer = props => {
       // console.log('done loading');
       return cachedSomething;
   };
-
-  
 
   const ensureMaxCacheSize = () => {
       const keys = Object.keys(state.cache);
@@ -329,42 +329,8 @@ const EllipsisVectorLayer = props => {
   }
 
   handleViewportUpdate();
-
   return render();
 }
-
-  // componentDidMount = () => {
-  //   console.log(this.props);
-  //   if(!this.props.mapRef) {
-  //     console.log(JSON.stringify(this.props));
-  //     return console.error(`No map reference was given to the ellipsis vector layer`);
-  //   }
-  // };
-
-//   componentDidUpdate = (prevProps, prevState) => {
-//     if(!prevProps.mapRef && this.props.mapRef) {
-//       this.handleViewportUpdate();
-//       this.props.mapRef.on('moveEnd', () => {
-//         this.handleViewportUpdate();
-//         console.log('end move');
-//       });
-//       this.props.mapRef.on('zoom', () => this.handleViewportUpdate());
-//     }
-//   }
-
-//   // componentDidUpdate = (prevProps, prevState) => {
-//   //   clearInterval(this.gettingVectorsInterval);
-//   //   this.gettingVectorsInterval = undefined;
-//   //   this.setState({cache: []}, () => this.handleViewportUpdate());
-//   // };
-
-//   componentWillUnmount = () => {
-//     clearInterval(this.gettingVectorsInterval);
-//   };
-
-
-
-// }
 
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
@@ -373,7 +339,8 @@ EllipsisVectorLayer.defaultProps = {
   radius: 15,
   maxFeaturesPerTile: 200,
   maxMbPerTile: 16000000,
-  maxTilesInCache: 500
+  maxTilesInCache: 500,
+  loadAll: false,
 }
 
 export default EllipsisVectorLayer;

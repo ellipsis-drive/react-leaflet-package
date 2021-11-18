@@ -13,7 +13,7 @@ In a React app, import the RasterLayer and VectorLayer:
 `import { EllipsisApi } from 'react-leaflet-ellipsis'`
 
 ### Example
-You can use RasterLayer and VectorLayer within a <map/> component.
+You can use RasterLayer and VectorLayer within a `<Map/>` component.
 
 ```jsx
 <Map>
@@ -63,8 +63,7 @@ useEffect(() => {
 | blockId        | Id of the block |
 | layerId     | Id of the layer |
 | maxZoom        | maxZoomlevel of the layer |
-| mapRef | A reference* to the MapContainer |
-| selectFeature        | A function to run on feature click, with as argument the clicked feature |
+| onFeatureClick        | A function to run on feature click, with as argument the clicked feature |
 | token        | (Optional) Token of the user |
 | styleId        | (Optional) Id of the layer style|
 | filter        | (Optional) A property filter to use|
@@ -75,19 +74,11 @@ useEffect(() => {
 | maxFeaturesPerTile        | The maximum number of vectors to load per tile. Default 200. |
 | radius | The radius of the points in the layer. Default 15. |
 | lineWidth | The width/weight of the lines in the layer. Default 5. |
+| loadAll | Always load all vectors, even if not visible or far away. Default false |
 
-*Passing a reference to the map can be done like this:
-```jsx
-const MyComponent() => {
-    const [map, setMap] = useState();
-    return(
-        <MapContainer whenCreated={setMap} ...>
-            <EllipsisVectorLayer mapRef={map} ... />
-        </MapContainer>
-    );
-}
+*warning* `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
-```
+### Use the EllipsisApi to login into Ellipsis Drive or view metadata of blocks
 
 #### EllipsisApi.login description
 **parameters**
@@ -109,13 +100,8 @@ expires: number //expiration time in milliseconds
 | -- | -- |
 | blockId | The block or shape id of the project. |
 | includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
+| user | (Optional) An user object which can contain a token like `user: {token: mytoken}` | 
 
 **return value**
 
-It returns JSON, which depends on the type of block.
-
-### Getting possible props
-You can do a https://api.ellipsis-drive.com/metadata POST request for a particular map to get the needed information to use the RasterLayer and VectorLayer componenent.
-
-See https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20metadata for full Ellipsis Drive API documentation.
-
+It returns JSON, which depends on the type of map.
