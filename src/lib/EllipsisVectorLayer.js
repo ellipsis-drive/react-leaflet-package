@@ -5,440 +5,338 @@ import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 import EllipsisApi from './EllipsisApi';
 
 export class EllipsisVectorLayer extends React.PureComponent {
-  setNewViewportTimer = null;
 
   constructor(props, context) {
-    super(props, context);
+    super(props);
     this.tiles = [];
-    this.geometryLayer = { tiles: [] };
     this.zoom = 1;
-    this.changed = false;
-    this.state = { getVectorChagned: 0 };
+    this.state = { cache: [] };
   }
 
-  componentDidMount = () => {
-    this.getVectors();
-    this.refreshing = setInterval(this.getVectors, 100);
-    this.onGetTiles();
-    this.gettingTiles = setInterval(this.onGetTiles, 100);
-  };
+  // componentDidMount = () => {
+  //   console.log(this.props);
+  //   if(!this.props.mapRef) {
+  //     console.log(JSON.stringify(this.props));
+  //     return console.error(`No map reference was given to the ellipsis vector layer`);
+  //   }
+  // };
 
   componentDidUpdate = (prevProps, prevState) => {
-    if (
-      prevProps.styleId !== this.props.styleId ||
-      prevProps.filter !== this.props.filter ||
-      prevProps.centerPoints !== this.props.centerPoints
-    ) {
-      this.geometryLayer = { tiles: [], pageStart: null };
+    if(!prevProps.mapRef && this.props.mapRef) {
+      this.handleViewportUpdate();
+      this.props.mapRef.on('moveEnd', () => {
+        this.handleViewportUpdate();
+        console.log('end move');
+      });
+      this.props.mapRef.on('zoom', () => this.handleViewportUpdate());
     }
-  };
+  }
+
+  // componentDidUpdate = (prevProps, prevState) => {
+  //   clearInterval(this.gettingVectorsInterval);
+  //   this.gettingVectorsInterval = undefined;
+  //   this.setState({cache: []}, () => this.handleViewportUpdate());
+  // };
 
   componentWillUnmount = () => {
-    clearInterval(this.refreshing);
-    clearInterval(this.gettingTiles);
+    clearInterval(this.gettingVectorsInterval);
   };
 
-  onGetTiles = () => {
-    let viewport = getLeafletMapBounds(this.props.mapRef);
-    if (!viewport) {
-      return;
-    }
-    let zoom = Math.min(this.props.maxZoom, viewport.zoom - 2);
-    zoom = Math.max(zoom, 0);
-    let tiles = boundsToTiles(viewport.bounds, zoom);
-    this.tiles = tiles;
-    this.zoom = zoom;
-  };
+  handleViewportUpdate = () => {
+    const viewport = this.getMapBounds();
+    if (!viewport) return;
+    this.zoom = Math.max(Math.min(this.maxZoom, viewport.zoom - 2), 0);
+    this.tiles = this.boundsToTiles(viewport.bounds, this.zoom);
 
-  getVectors = async () => {
-    if (this.gettingVectors) {
-      return;
-    }
-    this.gettingVectors = true;
-    this.changed = false;
-    let now = Date.now();
+    if(this.gettingVectorsInterval) return;
 
-    //for layers
-    await this.getVectorsHelper(now);
-    if (this.changed) {
-      this.setState({ getVectorChagned: this.state.getVectorChagned + 1 }, () => {
-        this.gettingVectors = false;
-      });
-    } else {
-      this.gettingVectors = false;
-    }
-  };
+    this.gettingVectorsInterval = setInterval(async () => {
+        if(this.isLoading) return;
 
-  getVectorsHelper = async (now) => {
-    let tiles = this.tiles;
-
-    //clear cache
-    let currentLength = Object.keys(this.geometryLayer.tiles).length;
-    if (currentLength > this.props.maxTilesInCache) {
-      let dates = Object.keys(this.geometryLayer.tiles).map((k) => this.geometryLayer.tiles[k].date);
-      dates.sort();
-      let clipValue = dates[9];
-      let keys = Object.keys(this.geometryLayer.tiles);
-      for (let k = 0; k < keys.length; k++) {
-        let key = keys[k];
-        if (this.geometryLayer.tiles[key].date <= clipValue) {
-          delete this.geometryLayer.tiles[keys[k]];
+        const loadedSomething = await this.loadStep();
+        if(!loadedSomething) {
+            clearInterval(this.gettingVectorsInterval);
+            this.gettingVectorsInterval = undefined;
+            return;
         }
-      }
-    }
+        this.setState({cache: []});
+    }, 100);
+  };
 
-    //prepare tiles parameter
-    let tilesParam = [...tiles];
-    tilesParam = tilesParam.map((t) => {
-      let pageStart;
-      let tileId = t.zoom + '_' + t.tileX + '_' + t.tileY;
-
-      if (this.geometryLayer.tiles[tileId]) {
-        pageStart = this.geometryLayer.tiles[tileId].nextPageStart;
-      }
-
-      if (
-        !this.geometryLayer.tiles[tileId] ||
-        (pageStart &&
-          this.geometryLayer.tiles[tileId].amount < this.props.maxFeaturesPerTile &&
-          this.geometryLayer.tiles[tileId].size < this.props.maxMbPerTile)
-      ) {
-        return { tileId: t, pageStart: pageStart };
+  loadStep = async () => {
+      this.isLoading = true;
+      if(this.props.loadAll) {
+          const cachedSomething = await this.getAndCacheAllGeoJsons();
+          this.isLoading = false;
+          return cachedSomething;
       }
 
-      return null;
-    });
+      this.ensureMaxCacheSize();
+      const cachedSomething = await this.getAndCacheGeoJsons();
+      this.isLoading = false;
+      return cachedSomething;
+  };
 
-    tilesParam = tilesParam.filter((x) => x);
-    //prepare other parameters
-    if (tilesParam.length > 0) {
-      //get addtional elements
-      this.changed = true;
-      await getGeoJsons(
-        this.geometryLayer,
-        tilesParam,
-        this.props.token,
-        this.props.blockId,
-        Math.min(3000, this.props.pageSize),
-        this.props.layerId,
-        this.props.styleId,
-        this.props.lineWidth,
-        this.props.radius,
-        this.selectFeature,
-        this.props.filter,
-        now,
-        this.props.centerPoints
+  ensureMaxCacheSize = () => {
+      const keys = Object.keys(this.state.cache);
+      if (keys.length > this.props.maxTilesInCache) {
+          const dates = keys.map((k) => this.state.cache[k].date).sort();
+          const clipValue = dates[9];
+          keys.forEach((key) => {
+              if (this.state.cache[key].date <= clipValue) {
+                  delete this.state.cache[key];
+              }
+          });
+      }
+  };
+
+  getAndCacheAllGeoJsons = async () => {
+      if(this.nextPageStart === 4)
+          return false;
+      
+      const body = {
+          pageStart: this.nextPageStart,
+          mapId: this.blockId,
+          returnType: this.centerPoints ? "center" : "geometry",
+          layerId: this.layerId,
+          zip: true,
+          pageSize: Math.min(3000, this.pageSize),
+          styleId: this.styleId
+      };
+
+      try {
+          const res = await EllipsisApi.post("/geometry/get", body, {token: this.props.token});
+          this.nextPageStart = res.nextPageStart;
+          if(!res.nextPageStart) 
+              this.nextPageStart = 4; //EOT
+          if(res.result && res.result.features) {
+              res.result.features.forEach(x => {
+                  this.styleGeoJson(x, this.props.lineWidth, this.props.radius);
+                  this.state.cache.push(x);
+              });
+          }
+      } catch {
+          return false;
+      }
+      return true;
+  };
+
+  getAndCacheGeoJsons = async () => {
+      const date = Date.now();
+      //create tiles parameter which contains tiles that need to load more features
+      const tiles = this.tiles.map((t) => {
+          const tileId = this.getTileId(t);
+
+          //If not cached, always try to load features.
+          if(!this.state.cache[tileId]) 
+              return { tileId: t}
+
+          const pageStart = this.state.cache[tileId].nextPageStart;
+
+          //TODO in other packages we use < instead of <=
+          //Check if tile is not already fully loaded, and if more features may be loaded
+          if(pageStart && this.state.cache[tileId].amount <= this.props.maxFeaturesPerTile && this.state.cache[tileId].size <= this.props.maxMbPerTile)
+              return { tileId: t, pageStart }
+
+          return null;
+      }).filter(x => x);
+
+      if(tiles.length === 0) return false;
+
+      const body = {
+          mapId: this.props.blockId,
+          returnType: this.props.centerPoints ? "center" : "geometry",
+          layerId: this.props.layerId,
+          zip: true,
+          pageSize: Math.min(3000, this.props.pageSize),
+          styleId: this.props.styleId,
+          propertyFilter: (this.props.filter && this.props.filter > 0) ? this.props.filter : null,
+      };
+
+      //Get new geometry for the tiles
+      let result = [];
+      const chunkSize = 10;
+      for (let k = 0; k < tiles.length; k += chunkSize) {
+          body.tiles = tiles.slice(k, k + chunkSize);
+          try {
+              const res = await EllipsisApi.post("/geometry/tile", body, {token: this.props.token});
+              result = result.concat(res);
+          } catch {
+              return false;
+          }
+      }
+      
+      //Add newly loaded data to cache
+      for (let j = 0; j < tiles.length; j++) {
+          const tileId = this.getTileId(tiles[j].tileId);
+
+          if (!this.state.cache[tileId]) {
+              this.state.cache[tileId] = {
+                  size: 0,
+                  amount: 0,
+                  elements: [],
+                  nextPageStart: null,
+              };
+          }
+
+          //set tile info for tile in this.
+          const tileData = this.state.cache[tileId];
+          tileData.date = date;
+          tileData.size = tileData.size + result[j].size;
+          tileData.amount = tileData.amount + result[j].result.features.length;
+          tileData.nextPageStart = result[j].nextPageStart;
+          result[j].result.features.forEach(x => this.styleGeoJson(x, this.props.lineWidth, this.props.radius));
+          tileData.elements = tileData.elements.concat(result[j].result.features);
+
+      }
+      return true;
+  };
+
+  getTileId = (tile) => `${tile.zoom}_${tile.tileX}_${tile.tileY}`;
+
+  getFeatureId = (feature, index = 0) => `${feature.properties.id}_${this.props.centerPoints ? 'center' : 'geometry'}_${this.props.styleId}_${index}`;
+
+  styleGeoJson = (geoJson, weight, radius) => {
+      if(!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
+
+      const type = geoJson.geometry.type;
+      const properties = geoJson.properties;
+      const color = properties.color;
+      const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
+
+      properties.style = {};
+
+      //Parse color and opacity
+      if(isHexColorFormat && color.length === 9) {
+        properties.style.fillOpacity = parseInt(color.substring(8,10), 16) / 25.5;
+        properties.style.color = color.substring(0,7);
+      }
+      else {
+        properties.style.fillOpacity = 0.6;
+        properties.style.color = color;
+      }
+
+      //TODO: weight default on 8 for LineString and MultiLineString, and 2 for Points?
+      
+      //Parse line width
+      if(type.endsWith('Point')) {
+          properties.style.radius = radius;
+          properties.style.weight = 2; 
+      }
+      else properties.style.weight = weight;
+  };
+
+  boundsToTiles = (bounds, zoom) => {
+      const xMin = Math.max(bounds.xMin, -180);
+      const xMax = Math.min(bounds.xMax, 180);
+      const yMin = Math.max(bounds.yMin, -85);
+      const yMax = Math.min(bounds.yMax, 85);
+
+      const zoomComp = Math.pow(2, zoom);
+      const comp1 = zoomComp / 360;
+      const pi = Math.PI;
+      const comp2 = 2 * pi;
+      const comp3 = pi / 4;
+
+      const tileXMin = Math.floor((xMin + 180) * comp1);
+      const tileXMax = Math.floor((xMax + 180) * comp1);
+      const tileYMin = Math.floor(
+          (zoomComp / comp2) *
+              (pi - Math.log(Math.tan(comp3 + (yMax / 360) * pi)))
       );
-    }
+      const tileYMax = Math.floor(
+          (zoomComp / comp2) *
+              (pi - Math.log(Math.tan(comp3 + (yMin / 360) * pi)))
+      );
+
+      let tiles = [];
+      for (
+          let x = Math.max(0, tileXMin - 1);
+          x <= Math.min(2 ** zoom - 1, tileXMax + 1);
+          x++
+      ) {
+          for (
+              let y = Math.max(0, tileYMin - 1);
+              y <= Math.min(2 ** zoom - 1, tileYMax + 1);
+              y++
+          ) {
+              tiles.push({ zoom, tileX: x, tileY: y });
+          }
+      }
+      return tiles;
   };
 
-  prepareGeometryLayer = () => {
-    let geometryTiles = this.tiles;
-
-    if (!geometryTiles) {
-      geometryTiles = [];
-    }
-    let layerElements = [];
-    for (let j = 0; j < geometryTiles.length; j++) {
-      let t = geometryTiles[j];
-      let extra = this.geometryLayer.tiles[t.zoom + '_' + t.tileX + '_' + t.tileY]
-        ? this.geometryLayer.tiles[t.zoom + '_' + t.tileX + '_' + t.tileY].elements
-        : [];
-      layerElements = layerElements.concat(extra);
-    }
-
-    return layerElements;
-  };
-
-  selectFeature = async (feature) => {
-    let body = {
-      mapId: this.props.blockId,
-      layerId: this.props.layerId,
-      geometryIds: [feature.properties.id],
-      returnType: 'all',
-    };
-    try {
-      let result = await EllipsisApi.post('/geometry/ids', body, this.props.token);
-      this.props.selectFeature({ size: result.size, feature: result.result.features[0] });
-    } catch (e) {
-      console.log(e);
-    }
+  getMapBounds = () => {
+      if (!this.props.mapRef) return;
+      const screenBounds = this.props.mapRef.getBounds();
+      const zoom = this.props.mapRef.getZoom();
+      let bounds = {
+          xMin: screenBounds.getWest(),
+          xMax: screenBounds.getEast(),
+          yMin: screenBounds.getSouth(),
+          yMax: screenBounds.getNorth(),
+      };
+      //Mapbox uses 512x512 tiles, and ellipsis uses 256x256 tiles. So increase zoom with 1. 'zoom256 = zoom512 + 1'
+      return { bounds: bounds, zoom: parseInt(zoom + 1, 10) };
   };
 
   render = () => {
-    return <React.Fragment>{this.prepareGeometryLayer()}</React.Fragment>;
-  };
-}
+    if (!this.tiles || this.tiles.length === 0) return <></>;
 
-const createGeoJsonLayerStyle = (color, fillOpacity, weight) => {
-  return {
-    color: color ? color : '#3388ff',
-    weight: weight ? weight : 5,
-    fillOpacity: fillOpacity ? fillOpacity : 0.06,
-  };
-}
-
-const boundsToTiles = (bounds, zoom) => {
-  zoom = Math.max(0, zoom);
-
-  let xMin = Math.max(bounds.xMin, -180);
-  let xMax = Math.min(bounds.xMax, 180);
-  let yMin = Math.max(bounds.yMin, -85);
-  let yMax = Math.min(bounds.yMax, 85);
-
-  let zoomComp = Math.pow(2, zoom);
-  let comp1 = zoomComp / 360;
-  let pi = Math.PI;
-  let comp2 = 2 * pi;
-  let comp3 = pi / 4;
-
-  let tileXMin = Math.floor((xMin + 180) * comp1);
-  let tileXMax = Math.floor((xMax + 180) * comp1);
-  let tileYMin = Math.floor((zoomComp / comp2) * (pi - Math.log(Math.tan(comp3 + (yMax / 360) * pi))));
-  let tileYMax = Math.floor((zoomComp / comp2) * (pi - Math.log(Math.tan(comp3 + (yMin / 360) * pi))));
-
-  let tiles = [];
-  let x = Math.max(0, tileXMin - 1);
-  while (x <= Math.min(2 ** zoom - 1, tileXMax + 1)) {
-    let y = Math.max(0, tileYMin - 1);
-    while (y <= Math.min(2 ** zoom - 1, tileYMax + 1)) {
-      tiles.push({ zoom: zoom, tileX: x, tileY: y });
-      y = y + 1;
-    }
-    x = x + 1;
-  }
-  return tiles;
-};
-
-const getGeoJsons = async (
-  geometryLayer,
-  tiles,
-  token,
-  mapId,
-  pageSize,
-  layerId,
-  styleId,
-  lineWidth,
-  radius,
-  selectFeature,
-  filter,
-  date,
-  showLocation
-) => {
-  let returnType = showLocation ? 'center' : 'geometry';
-  filter = filter ? (filter.length > 0 ? filter : null) : null;
-
-  let body = {
-    mapId: mapId,
-    returnType: returnType,
-    layerId: layerId,
-    zip: true,
-    pageSize: pageSize,
-    styleId: styleId,
-    propertyFilter: filter,
-  };
-
-  let result = [];
-
-  let chunkSize = 10;
-  for (let k = 0; k < tiles.length; k += chunkSize) {
-    body.tiles = tiles.slice(k, k + chunkSize);
-    try {
-      let res = await EllipsisApi.post('/geometry/tile', body, token);
-      result = result.concat(res);
-    } catch {
-      return null;
-    }
-  }
-
-  for (let j = 0; j < tiles.length; j++) {
-    let t = tiles[j];
-    let tileId = t.tileId.zoom + '_' + t.tileId.tileX + '_' + t.tileId.tileY;
-
-    if (!geometryLayer.tiles[tileId]) {
-      geometryLayer.tiles[tileId] = { size: 0, amount: 0, elements: [], nextPageStart: null };
-    }
-    let tileInfo = geometryLayer.tiles[tileId];
-
-    tileInfo.date = date;
-    tileInfo.size = tileInfo.size + result[j].size;
-    tileInfo.amount = tileInfo.amount + result[j].result.features.length;
-    tileInfo.nextPageStart = result[j].nextPageStart;
-
-    let elements = [];
-    for (let l = 0; l < result[j].result.features.length; l++) {
-      let feature = result[j].result.features[l];
-      let newElements = featureToGeoJson(
-        feature,
-        feature.properties.color,
-        lineWidth,
-        radius,
-        500,
-        selectFeature,
-        feature.properties.id + '_' + returnType + '_' + styleId
-      );
-      elements = elements.concat(newElements);
-    }
-
-    tileInfo.elements = tileInfo.elements.concat(elements);
-  }
-};
-
-const featureToGeoJson = (feature, color, width, radius, geometryLength, onFeatureClick, key, asMarker, forceColor = false) => {
-  let alpha;
-
-  if (color) {
-    if (!forceColor) {
-      if (feature.properties && feature.properties.color) {
-        let colorString = feature.properties.color;
-        let valid = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(colorString);
-
-        if (valid) {
-          color = colorString;
-        }
-      }
-    }
-
-    if (color.length === 10) {
-      alpha = color.substring(8, 10);
-      alpha = parseFloat(parseInt(alpha, 16)) / 255;
+    let features;
+    if(this.props.loadAll) {
+        features = this.state.cache;
     } else {
-      alpha = 0.5;
+        features = this.tiles.flatMap((t) => {
+            const geoTile = this.state.cache[this.getTileId(t)];
+            return geoTile ? geoTile.elements : [];
+        });
     }
-  }
 
-  let element;
-  let type = feature.geometry.type;
-  if (type === 'Polygon' || type === 'MultiPolygon') {
-    element = [
-      <GeoJSON
-        key={key}
-        data={feature}
-        style={color ? createGeoJsonLayerStyle(color, alpha, width) : null}
-        interactive={onFeatureClick ? true : false}
-        onEachFeature={
-          onFeatureClick
-            ? (feature, layer) => {
-                layer.on({ click: () => onFeatureClick(feature) });
-              }
-            : null
-        }
-      />,
-    ];
-  } else if (type === 'LineString' || type === 'MultiLineString') {
-    element = [
-      <GeoJSON
-        key={key}
-        data={feature}
-        style={color ? createGeoJsonLayerStyle(color, 1, 8) : null}
-        interactive={onFeatureClick ? true : false}
-        onEachFeature={
-          onFeatureClick
-            ? (feature, layer) => {
-                layer.on({ click: () => onFeatureClick(feature) });
-              }
-            : null
-        }
-      />,
-    ];
-  } else if (type === 'Point' || type === 'MultiPoint') {
-    let radius = Math.min(150 / geometryLength ** 0.5, radius);
-
-    let coords = feature.geometry.coordinates;
-    let isMultiMarker = Array.isArray(coords) && Array.isArray(coords[0]);
-    if (isMultiMarker === true) {
-      if (asMarker) {
-        element = coords.map((coord, i) => (
-          <Marker
-            key={key + '_' + i}
-            position={[coord[1], coord[0]]}
-            interactive={onFeatureClick ? true : false}
-            onClick={
-              onFeatureClick
-                ? () => {
-                    onFeatureClick(feature);
-                  }
-                : null
-            }
-          />
-        ));
-      } else {
-        element = coords.map((coord, i) => (
-          <CircleMarker
-            key={key + '_' + i}
-            center={[coord[1], coord[0]]}
-            color={color}
-            opacity={1}
-            radius={radius}
-            weight={2}
-            interactive={onFeatureClick ? true : false}
-            onClick={
-              onFeatureClick
-                ? () => {
-                    onFeatureClick(feature);
-                  }
-                : null
-            }
-          />
-        ));
-      }
-    } else {
-      if (asMarker) {
-        element = [
-          <Marker
-            key={key}
-            position={[coords[1], coords[0]]}
-            interactive={onFeatureClick ? true : false}
-            onClick={
-              onFeatureClick
-                ? () => {
-                    onFeatureClick(feature);
-                  }
-                : null
-            }
-          />
-        ];
-      } else {
-        element = [
-          <CircleMarker
-            center={[coords[1], coords[0]]}
-            color={color}
-            opacity={1}
-            radius={radius}
-            weight={2}
-            key={key}
-            interactive={onFeatureClick ? true : false}
-            onClick={
-              onFeatureClick
-                ? () => {
-                    onFeatureClick(feature);
-                  }
-                : null
+    return <>{features.flatMap(feature => {
+      const type = feature.geometry.type;
+      //Check for (Multi)Polygons and (Multi)LineStrings
+      if (type.endsWith('Polygon') || type.endsWith('LineString')) {
+        return [
+          <GeoJSON
+            key={this.getFeatureId(feature)}
+            data={feature}
+            style={feature.properties.style}
+            interactive={this.props.onFeatureClick ? true : false}
+            onEachFeature={!this.props.onFeatureClick ? undefined : (feature, layer) => 
+                layer.on('click', () => this.props.onFeatureClick(feature, layer))
             }
           />,
         ];
       }
-    }
+      if (type.endsWith('Point')) {
+        let coordinates = feature.geometry.coordinates;
+        //Ensure that it's always an array of coordinates.
+        if(!type.startsWith('Multi')) coordinates = [coordinates];
+
+        return coordinates.map((coordinate, i) => this.useMarkers ? 
+          <Marker
+            key={this.getFeatureId(feature, i)}
+            position={[coordinate[1], coordinate[0]]}
+            interactive={this.props.onFeatureClick ? true : false}
+            onClick={!this.props.onFeatureClick ? undefined : (e) => this.props.onFeatureClick(feature, e)}
+          /> :
+          <CircleMarker
+            key={this.getFeatureId(feature, i)}
+            center={[coordinate[1], coordinate[0]]}
+            color={feature.properties.style.color}
+            opacity={feature.properties.style.fillOpacity}
+            radius={feature.properties.style.radius}
+            weight={feature.properties.style.weight}
+            interactive={this.props.onFeatureClick ? true : false}
+            onClick={!this.props.onFeatureClick ? undefined : (e) => this.props.onFeatureClick(feature, e)}
+          />
+        )
+      }
+      return [];
+    })}</>
   }
-  return element;
-};
-
-const getLeafletMapBounds = (leafletMap) => {
-  if(!leafletMap || !leafletMap._zoom) return;
-
-  const screenBounds = leafletMap.getBounds();
-
-  let bounds = {
-    xMin: screenBounds.getWest(),
-    xMax: screenBounds.getEast(),
-    yMin: screenBounds.getSouth(),
-    yMax: screenBounds.getNorth(),
-  };
-
-  return { bounds: bounds, zoom: leafletMap._zoom };
-};
-
-
+}
 
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
