@@ -31,6 +31,8 @@ export const EllipsisVectorLayer = props => {
   useEffect(() => {
     //This'll ensure that another state change happens when needed.
     handleViewportUpdate();
+    
+  // eslint-disable-next-line
   }, [state]);
 
   const handleViewportUpdate = async () => {

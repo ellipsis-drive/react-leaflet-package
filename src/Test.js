@@ -6,13 +6,12 @@ import 'leaflet/dist/leaflet.css';
 import EllipsisApi from './lib/EllipsisApi';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 const position = [51.505, -0.09]
 
 
 function Test() {
-  const [map,setMap] = useState();
 
   const username = process.env.REACT_APP_USERNAME;
   const password = process.env.REACT_APP_PASSWORD;
@@ -33,7 +32,7 @@ function Test() {
   return (
     <>
     <h1 style={{textAlign:'center', margin:'20px'}}>Below is a test of the map.</h1>
-    <MapContainer whenCreated={setMap} style={{height:'70vh', width:'80vw', margin: '0 auto'}} center={position} zoom={13} scrollWheelZoom={true}>
+    <MapContainer style={{height:'70vh', width:'80vw', margin: '0 auto'}} center={position} zoom={13} scrollWheelZoom={true}>
       <TileLayer 
         noWrap={true}
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -60,12 +59,12 @@ function Test() {
         token={token.current}
         mapRef={map}
       /> */}
-      {/* <EllipsisRasterLayer 
+      <EllipsisRasterLayer 
         blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
         visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'
         captureId={0}
         token={token.current}
-      /> */}
+      />
     </MapContainer>
     </>
   );
