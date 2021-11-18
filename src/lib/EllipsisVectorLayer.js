@@ -6,6 +6,8 @@ import EllipsisApi from './EllipsisApi';
 
 const EllipsisVectorLayer = props => {
 
+  let stateIsChanging = false;
+
   const [state, setState] = useState({
     cache: [],
     tiles: [],
@@ -15,28 +17,23 @@ const EllipsisVectorLayer = props => {
     lastChanged: Date.now()
   });
 
-  const map = useMapEvents({
-    moveend: () => {
+  const map = useMapEvents(!props.loadAll ? {
+    //Too intensive?
+    move: () => {
       handleViewportUpdate();
     },
     zoomend: () => {
       handleViewportUpdate();
     }
-  });
+  }: {});
 
   useEffect(() => {
-    if(state.isLoading) return;
-    loadStep().then(loadedSomething => {
-      if(loadedSomething){
-        state.lastChanged = Date.now();
-        setState({...state});
-      }
-    });
+    handleViewportUpdate();
   }, [state])
 
   const handleViewportUpdate = async () => {
     const viewport = getMapBounds();
-    if (!viewport) return;
+    if (!viewport || state.isLoading || stateIsChanging) return;
     state.zoom = Math.max(Math.min(props.maxZoom, viewport.zoom - 2), 0);
     state.tiles = boundsToTiles(viewport.bounds, state.zoom);
 
@@ -44,6 +41,7 @@ const EllipsisVectorLayer = props => {
     const loadedSomething = await loadStep();
     if(loadedSomething){
       state.lastChanged = Date.now();
+      stateIsChanging = true;
       setState({...state});
     }
   };
@@ -271,7 +269,6 @@ const EllipsisVectorLayer = props => {
   };
 
   const render = () => {
-    console.log('render');
     if (!state.tiles || state.tiles.length === 0) return <></>;
     let features;
     if(props.loadAll) {
@@ -283,9 +280,9 @@ const EllipsisVectorLayer = props => {
         });
     }
 
-    console.log(features.filter(x => 
-      features.filter(y => y.properties.id === x.properties.id).length > 1
-    ));
+    // console.log(features.filter(x => 
+    //   features.filter(y => y.properties.id === x.properties.id).length > 1
+    // ).length > 0);
 
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
