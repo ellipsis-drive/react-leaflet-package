@@ -4,7 +4,7 @@ import { GeoJSON, CircleMarker, Marker, useMapEvents } from 'react-leaflet';
 
 import EllipsisApi from './EllipsisApi';
 
-const EllipsisVectorLayer = props => {
+export const EllipsisVectorLayer = props => {
 
   //When set to true, it'll reset to false after a state change.
   let stateIsChanging = false;
