@@ -11,6 +11,10 @@ require("core-js/modules/es.promise.js");
 
 require("core-js/modules/es.array.sort.js");
 
+require("core-js/modules/es.regexp.exec.js");
+
+require("core-js/modules/es.regexp.test.js");
+
 require("core-js/modules/es.parse-int.js");
 
 require("core-js/modules/es.string.ends-with.js");
@@ -33,25 +37,17 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 const EllipsisVectorLayer = props => {
-  //When set to true, it'll reset to false after a state change.
-  let stateIsChanging = false;
-  const [state, setState] = (0, _react.useState)({
+  const [, update] = (0, _react.useState)(0);
+  const [state] = (0, _react.useState)({
     cache: [],
     tiles: [],
     zoom: 1,
     isLoading: false,
     nextPageStart: undefined,
-    lastChanged: Date.now()
+    gettingVectorsInterval: undefined
   });
   const map = (0, _reactLeaflet.useMapEvents)(!props.loadAll ? {
-    //Too intensive?
     move: () => {
       handleViewportUpdate();
     },
@@ -60,23 +56,27 @@ const EllipsisVectorLayer = props => {
     }
   } : {});
   (0, _react.useEffect)(() => {
-    //This'll ensure that another state change happens when needed.
-    handleViewportUpdate(); // eslint-disable-next-line
-  }, [state]);
+    handleViewportUpdate();
+  }, []);
 
-  const handleViewportUpdate = async () => {
+  const handleViewportUpdate = () => {
     const viewport = getMapBounds();
-    if (!viewport || state.isLoading || stateIsChanging) return;
+    if (!viewport) return;
     state.zoom = Math.max(Math.min(props.maxZoom, viewport.zoom - 2), 0);
     state.tiles = boundsToTiles(viewport.bounds, state.zoom);
-    if (state.isLoading) return;
-    const loadedSomething = await loadStep();
+    if (state.gettingVectorsInterval) return;
+    state.gettingVectorsInterval = setInterval(async () => {
+      if (state.isLoading) return;
+      const loadedSomething = await loadStep();
 
-    if (loadedSomething) {
-      state.lastChanged = Date.now();
-      stateIsChanging = true;
-      setState(_objectSpread({}, state));
-    }
+      if (!loadedSomething) {
+        clearInterval(state.gettingVectorsInterval);
+        state.gettingVectorsInterval = undefined;
+        return;
+      }
+
+      update(Date.now());
+    }, 100);
   };
 
   const loadStep = async () => {
@@ -286,7 +286,7 @@ const EllipsisVectorLayer = props => {
 
     return {
       bounds,
-      zoom
+      zoom: parseInt(zoom, 10)
     };
   };
 
@@ -344,7 +344,6 @@ const EllipsisVectorLayer = props => {
     }));
   };
 
-  handleViewportUpdate();
   return render();
 };
 

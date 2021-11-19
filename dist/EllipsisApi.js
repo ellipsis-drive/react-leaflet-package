@@ -7,6 +7,8 @@ exports.default = void 0;
 
 require("core-js/modules/es.promise.js");
 
+require("core-js/modules/es.json.stringify.js");
+
 require("core-js/modules/es.string.includes.js");
 
 const apiUrl = 'https://api.ellipsis-drive.com/v1';

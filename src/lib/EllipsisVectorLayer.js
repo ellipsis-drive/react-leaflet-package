@@ -6,9 +6,6 @@ import EllipsisApi from './EllipsisApi';
 
 export const EllipsisVectorLayer = props => {
 
-  //When set to true, it'll reset to false after a state change.
-  let stateIsChanging = false;
-
   const [, update] = useState(0);
 
   const [state] = useState({
@@ -21,7 +18,6 @@ export const EllipsisVectorLayer = props => {
   });
 
   const map = useMapEvents(!props.loadAll ? {
-    //Too intensive?
     move: () => {
       handleViewportUpdate();
     },
@@ -30,13 +26,9 @@ export const EllipsisVectorLayer = props => {
     }
   } : {});
 
-  // useEffect(() => {
-  //   stateIsChanging = false;
-  //   //This'll ensure that another state change happens when needed.
-  //   handleViewportUpdate();
-
-  //   // eslint-disable-next-line
-  // }, [state]);
+  useEffect(() => {
+    handleViewportUpdate();
+  }, []);
 
   const handleViewportUpdate = () => {
     const viewport = getMapBounds();
@@ -339,7 +331,6 @@ export const EllipsisVectorLayer = props => {
     })}</>
   }
 
-  handleViewportUpdate();
   return render();
 }
 
