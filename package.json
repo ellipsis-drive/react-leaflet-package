@@ -1,7 +1,10 @@
 {
   "name": "react-leaflet-ellipsis",
-  "description": "Use Ellipsis Drive layers in react-leaflet",
-  "author": "Daniel van der Maas",
+  "description": "Use Ellipsis Drive layers as react-leaflet components",
+  "authors": [
+    "Jelle Keulemans",
+    "Daniel van der Maas"
+  ],
   "keywords": [
     "Ellipsis",
     "Ellipsis Drive",
@@ -21,14 +24,9 @@
     "url": "git+https://github.com/ellipsis-drive-internal/react-leaflet-package.git"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.12.1",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
     "core-js": "^3.18.3",
     "leaflet": "^1.7.1",
-    "react-leaflet": "^3.2.1",
-    "web-vitals": "^1.0.1"
+    "react-leaflet": "^3.2.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -42,11 +40,6 @@
       "react-app/jest"
     ]
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ],
   "devDependencies": {
     "@babel/cli": "^7.15.7",
     "@babel/core": "^7.15.8",
@@ -55,5 +48,10 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ]
 }
