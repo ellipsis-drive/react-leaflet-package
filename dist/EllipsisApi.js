@@ -123,7 +123,7 @@ const EllipsisApi = {
     if (includeDeleted) body = {
       mapId: blockId,
       includeDeleted
-    };else body = {
+    }; else body = {
       mapId: blockId
     };
     return ellipsisApiManagerFetch('POST', '/metadata', body, user);
