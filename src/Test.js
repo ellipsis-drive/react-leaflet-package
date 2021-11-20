@@ -17,6 +17,7 @@ function Test() {
   const password = process.env.REACT_APP_PASSWORD;
   let token = useRef();
   useEffect(() => {
+    console.log(React.version);
     EllipsisApi.login(username, password).then((res) => {
       console.log(res)
       token.current = res.token;
