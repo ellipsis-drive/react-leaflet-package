@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { GeoJSON, CircleMarker, Marker, useMapEvents } from 'react-leaflet';
 

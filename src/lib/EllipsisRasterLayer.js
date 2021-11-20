@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { TileLayer } from 'react-leaflet';
 
 import EllipsisApi from './EllipsisApi';
