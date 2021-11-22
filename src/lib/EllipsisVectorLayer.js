@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import { GeoJSON, CircleMarker, Marker, useMapEvents } from 'react-leaflet';
+import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 
 import EllipsisApi from './EllipsisApi';
+
+const reactLeaflet = require('react-leaflet');
+let useLeaflet = reactLeaflet.useLeaflet;
+let useMapEvents = reactLeaflet.useMapEvents;
+
+if (!useLeaflet) useLeaflet = () => { return {} };
+if (!useMapEvents) useMapEvents = () => { return {} };
 
 export const EllipsisVectorLayer = props => {
 
@@ -17,7 +24,11 @@ export const EllipsisVectorLayer = props => {
     gettingVectorsInterval: undefined
   });
 
-  const map = useMapEvents(!props.loadAll ? {
+
+  let map;
+
+  //Use new map events if available.
+  let map_new = useMapEvents(!props.loadAll ? {
     move: () => {
       handleViewportUpdate();
     },
@@ -25,7 +36,23 @@ export const EllipsisVectorLayer = props => {
       handleViewportUpdate();
     }
   } : {});
+  useEffect(() => {
+    if (!map_new) return;
+    map = map_new;
+  }, [map_new]);
 
+  //Use legacy hooks if needed.
+  let map_old = useLeaflet().map;
+  useEffect(() => {
+    if (!map_old) return;
+    map = map_old;
+    map.on('move', () => handleViewportUpdate());
+    map.on('zoomend', () => handleViewportUpdate());
+  }, [map_old]);
+
+
+
+  //On mount, start updating the map.
   useEffect(() => {
     handleViewportUpdate();
   }, []);
