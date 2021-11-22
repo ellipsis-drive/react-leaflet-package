@@ -42,10 +42,10 @@ const reactLeaflet = require('react-leaflet');
 let useLeaflet = reactLeaflet.useLeaflet;
 let useMapEvents = reactLeaflet.useMapEvents;
 if (!useLeaflet) useLeaflet = () => {
-  return {};
+  return undefined;
 };
 if (!useMapEvents) useMapEvents = () => {
-  return {};
+  return undefined;
 };
 
 const EllipsisVectorLayer = props => {
@@ -57,29 +57,34 @@ const EllipsisVectorLayer = props => {
     isLoading: false,
     nextPageStart: undefined,
     gettingVectorsInterval: undefined
-  });
-  const map = (0, _react.useRef)(); //Use new map events if available.
+  }); //Use new map events if available.
 
-  let map_new = useMapEvents(!props.loadAll ? {
+  const _map3x = useMapEvents(!props.loadAll ? {
     move: () => {
       handleViewportUpdate();
     },
     zoomend: () => {
       handleViewportUpdate();
     }
-  } : {});
-  (0, _react.useEffect)(() => {
-    if (!map_new) return;
-    map.current = map_new;
-  }, [map_new]); //Use legacy hooks if needed.
+  } : {}); //Use legacy hooks if needed.
 
-  let map_old = useLeaflet().map;
+
+  const _map2x = useLeaflet();
+
   (0, _react.useEffect)(() => {
-    if (!map_old) return;
-    map.current = map_old;
-    map.current.on('move', () => handleViewportUpdate());
-    map.current.on('zoomend', () => handleViewportUpdate()); // eslint-disable-next-line
-  }, [map_old]); //On mount, start updating the map.
+    if (!_map2x) return;
+
+    _map2x.map.on('move', () => handleViewportUpdate());
+
+    _map2x.map.on('zoomend', () => handleViewportUpdate()); // eslint-disable-next-line
+
+  }, [_map2x]);
+
+  const getMapRef = () => {
+    if (_map2x && _map2x.map) return _map2x.map;
+    return _map3x;
+  }; //On mount, start updating the map.
+
 
   (0, _react.useEffect)(() => {
     handleViewportUpdate(); // eslint-disable-next-line
@@ -300,9 +305,10 @@ const EllipsisVectorLayer = props => {
   };
 
   const getMapBounds = () => {
-    if (!map.current) return;
-    const screenBounds = map.current.getBounds();
-    const zoom = map.current.getZoom();
+    const map = getMapRef();
+    if (!map) return;
+    const screenBounds = map.getBounds();
+    const zoom = map.getZoom();
     let bounds = {
       xMin: screenBounds.getWest(),
       xMax: screenBounds.getEast(),

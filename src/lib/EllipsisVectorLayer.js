@@ -8,8 +8,8 @@ const reactLeaflet = require('react-leaflet');
 let useLeaflet = reactLeaflet.useLeaflet;
 let useMapEvents = reactLeaflet.useMapEvents;
 
-if (!useLeaflet) useLeaflet = () => { return {} };
-if (!useMapEvents) useMapEvents = () => { return {} };
+if (!useLeaflet) useLeaflet = () => { return undefined; };
+if (!useMapEvents) useMapEvents = () => { return undefined; };
 
 export const EllipsisVectorLayer = props => {
 
@@ -24,13 +24,8 @@ export const EllipsisVectorLayer = props => {
     gettingVectorsInterval: undefined
   });
 
-
-  const map = useRef();
-
-
-
   //Use new map events if available.
-  let map_new = useMapEvents(!props.loadAll ? {
+  const _map3x = useMapEvents(!props.loadAll ? {
     move: () => {
       handleViewportUpdate();
     },
@@ -38,23 +33,21 @@ export const EllipsisVectorLayer = props => {
       handleViewportUpdate();
     }
   } : {});
-  useEffect(() => {
-    if (!map_new) return;
-    map.current = map_new;
-  }, [map_new]);
-
 
   //Use legacy hooks if needed.
-  let map_old = useLeaflet().map;
+  const _map2x = useLeaflet();
   useEffect(() => {
-    if (!map_old) return;
-    map.current = map_old;
-    map.current.on('move', () => handleViewportUpdate());
-    map.current.on('zoomend', () => handleViewportUpdate());
+    if (!_map2x) return;
+    _map2x.map.on('move', () => handleViewportUpdate());
+    _map2x.map.on('zoomend', () => handleViewportUpdate());
     // eslint-disable-next-line
-  }, [map_old]);
+  }, [_map2x]);
 
+  const getMapRef = () => {
+    if (_map2x && _map2x.map) return _map2x.map;
 
+    return _map3x;
+  }
 
   //On mount, start updating the map.
   useEffect(() => {
@@ -290,9 +283,11 @@ export const EllipsisVectorLayer = props => {
   };
 
   const getMapBounds = () => {
-    if (!map.current) return;
-    const screenBounds = map.current.getBounds();
-    const zoom = map.current.getZoom();
+    const map = getMapRef();
+    if (!map) return;
+
+    const screenBounds = map.getBounds();
+    const zoom = map.getZoom();
     let bounds = {
       xMin: screenBounds.getWest(),
       xMax: screenBounds.getEast(),

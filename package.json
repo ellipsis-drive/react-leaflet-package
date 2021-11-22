@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "leaflet": "^1.7.1",
-    "react-leaflet": "^2.6.3 || ^3.2.2"
+    "react-leaflet": "^3.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.15.7",
@@ -50,8 +50,7 @@
     "react-scripts": "4.0.3"
   },
   "peerDependencies": {
-    "leaflet": "^1.7.1",
-    "react-leaflet": "^2.6.3 || ^3.2.2"
+    "react-leaflet": "*"
   },
   "browserslist": [
     ">0.2%",
