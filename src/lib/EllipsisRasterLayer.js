@@ -1,4 +1,4 @@
-import { TileLayer } from 'react-leaflet';
+import React, { TileLayer } from 'react-leaflet';
 
 import EllipsisApi from './EllipsisApi';
 

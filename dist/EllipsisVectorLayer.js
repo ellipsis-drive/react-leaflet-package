@@ -25,13 +25,28 @@ require("core-js/modules/es.array.unscopables.flat-map.js");
 
 require("core-js/modules/es.string.starts-with.js");
 
-var _react = require("react");
+var _react = _interopRequireWildcard(require("react"));
 
 var _reactLeaflet = require("react-leaflet");
 
 var _EllipsisApi = _interopRequireDefault(require("./EllipsisApi"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const reactLeaflet = require('react-leaflet');
+
+let useLeaflet = reactLeaflet.useLeaflet;
+let useMapEvents = reactLeaflet.useMapEvents;
+if (!useLeaflet) useLeaflet = () => {
+  return {};
+};
+if (!useMapEvents) useMapEvents = () => {
+  return {};
+};
 
 const EllipsisVectorLayer = props => {
   const [, update] = (0, _react.useState)(0);
@@ -43,7 +58,9 @@ const EllipsisVectorLayer = props => {
     nextPageStart: undefined,
     gettingVectorsInterval: undefined
   });
-  const map = (0, _reactLeaflet.useMapEvents)(!props.loadAll ? {
+  const map = (0, _react.useRef)(); //Use new map events if available.
+
+  let map_new = useMapEvents(!props.loadAll ? {
     move: () => {
       handleViewportUpdate();
     },
@@ -52,7 +69,20 @@ const EllipsisVectorLayer = props => {
     }
   } : {});
   (0, _react.useEffect)(() => {
-    handleViewportUpdate();
+    if (!map_new) return;
+    map.current = map_new;
+  }, [map_new]); //Use legacy hooks if needed.
+
+  let map_old = useLeaflet().map;
+  (0, _react.useEffect)(() => {
+    if (!map_old) return;
+    map.current = map_old;
+    map.current.on('move', () => handleViewportUpdate());
+    map.current.on('zoomend', () => handleViewportUpdate()); // eslint-disable-next-line
+  }, [map_old]); //On mount, start updating the map.
+
+  (0, _react.useEffect)(() => {
+    handleViewportUpdate(); // eslint-disable-next-line
   }, []);
 
   const handleViewportUpdate = () => {
@@ -270,9 +300,9 @@ const EllipsisVectorLayer = props => {
   };
 
   const getMapBounds = () => {
-    if (!map) return;
-    const screenBounds = map.getBounds();
-    const zoom = map.getZoom();
+    if (!map.current) return;
+    const screenBounds = map.current.getBounds();
+    const zoom = map.current.getZoom();
     let bounds = {
       xMin: screenBounds.getWest(),
       xMax: screenBounds.getEast(),
@@ -287,7 +317,7 @@ const EllipsisVectorLayer = props => {
   };
 
   const render = () => {
-    if (!state.tiles || state.tiles.length === 0) return /*#__PURE__*/React.createElement(React.Fragment, null);
+    if (!state.tiles || state.tiles.length === 0) return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
     let features;
 
     if (props.loadAll) {
@@ -302,11 +332,11 @@ const EllipsisVectorLayer = props => {
     // ).length > 0);
 
 
-    return /*#__PURE__*/React.createElement(React.Fragment, null, features.flatMap(feature => {
+    return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, features.flatMap(feature => {
       const type = feature.geometry.type; //Check for (Multi)Polygons and (Multi)LineStrings
 
       if (type.endsWith('Polygon') || type.endsWith('LineString')) {
-        return [/*#__PURE__*/React.createElement(_reactLeaflet.GeoJSON, {
+        return [/*#__PURE__*/_react.default.createElement(_reactLeaflet.GeoJSON, {
           key: getFeatureId(feature),
           data: feature,
           style: feature.properties.style,
@@ -319,12 +349,12 @@ const EllipsisVectorLayer = props => {
         let coordinates = feature.geometry.coordinates; //Ensure that it's always an array of coordinates.
 
         if (!type.startsWith('Multi')) coordinates = [coordinates];
-        return coordinates.map((coordinate, i) => props.useMarkers ? /*#__PURE__*/React.createElement(_reactLeaflet.Marker, {
+        return coordinates.map((coordinate, i) => props.useMarkers ? /*#__PURE__*/_react.default.createElement(_reactLeaflet.Marker, {
           key: getFeatureId(feature, i),
           position: [coordinate[1], coordinate[0]],
           interactive: props.onFeatureClick ? true : false,
           onClick: !props.onFeatureClick ? undefined : e => props.onFeatureClick(feature, e)
-        }) : /*#__PURE__*/React.createElement(_reactLeaflet.CircleMarker, {
+        }) : /*#__PURE__*/_react.default.createElement(_reactLeaflet.CircleMarker, {
           key: getFeatureId(feature, i),
           center: [coordinate[1], coordinate[0]],
           color: feature.properties.style.color,

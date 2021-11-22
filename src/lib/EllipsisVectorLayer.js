@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 
@@ -25,7 +25,9 @@ export const EllipsisVectorLayer = props => {
   });
 
 
-  let map;
+  const map = useRef();
+
+
 
   //Use new map events if available.
   let map_new = useMapEvents(!props.loadAll ? {
@@ -38,16 +40,18 @@ export const EllipsisVectorLayer = props => {
   } : {});
   useEffect(() => {
     if (!map_new) return;
-    map = map_new;
+    map.current = map_new;
   }, [map_new]);
+
 
   //Use legacy hooks if needed.
   let map_old = useLeaflet().map;
   useEffect(() => {
     if (!map_old) return;
-    map = map_old;
-    map.on('move', () => handleViewportUpdate());
-    map.on('zoomend', () => handleViewportUpdate());
+    map.current = map_old;
+    map.current.on('move', () => handleViewportUpdate());
+    map.current.on('zoomend', () => handleViewportUpdate());
+    // eslint-disable-next-line
   }, [map_old]);
 
 
@@ -55,6 +59,7 @@ export const EllipsisVectorLayer = props => {
   //On mount, start updating the map.
   useEffect(() => {
     handleViewportUpdate();
+    // eslint-disable-next-line
   }, []);
 
   const handleViewportUpdate = () => {
@@ -285,9 +290,9 @@ export const EllipsisVectorLayer = props => {
   };
 
   const getMapBounds = () => {
-    if (!map) return;
-    const screenBounds = map.getBounds();
-    const zoom = map.getZoom();
+    if (!map.current) return;
+    const screenBounds = map.current.getBounds();
+    const zoom = map.current.getZoom();
     let bounds = {
       xMin: screenBounds.getWest(),
       xMax: screenBounds.getEast(),
