@@ -1,7 +1,7 @@
 {
   "name": "react-leaflet-ellipsis",
   "description": "Use Ellipsis Drive layers as react-leaflet components",
-  "authors": [
+  "contributors": [
     "Jelle Keulemans",
     "Daniel van der Maas"
   ],
