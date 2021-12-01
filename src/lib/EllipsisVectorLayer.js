@@ -117,7 +117,8 @@ export const EllipsisVectorLayer = props => {
       layerId: props.layerId,
       zip: true,
       pageSize: Math.min(3000, props.pageSize),
-      styleId: props.styleId
+      styleId: props.styleId,
+      style: props.style
     };
 
     try {
@@ -166,6 +167,7 @@ export const EllipsisVectorLayer = props => {
       zip: true,
       pageSize: Math.min(3000, props.pageSize),
       styleId: props.styleId,
+      style: props.style,
       propertyFilter: (props.filter && props.filter > 0) ? props.filter : null,
     };
 
