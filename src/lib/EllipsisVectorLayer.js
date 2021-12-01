@@ -151,7 +151,7 @@ export const EllipsisVectorLayer = props => {
 
       //TODO in other packages we use < instead of <=
       //Check if tile is not already fully loaded, and if more features may be loaded
-      if (pageStart && state.cache[tileId].amount <= props.maxFeaturesPerTile && state.cache[tileId].size <= props.maxMbPerTile)
+      if (pageStart && state.cache[tileId].amount <= props.maxFeaturesPerTile && state.cache[tileId].size <= (props.maxMbPerTile * 1000000))
         return { tileId: t, pageStart }
 
       return null;
@@ -367,7 +367,7 @@ EllipsisVectorLayer.defaultProps = {
   lineWidth: 5,
   radius: 15,
   maxFeaturesPerTile: 200,
-  maxMbPerTile: 16000000,
+  maxMbPerTile: 16,
   maxTilesInCache: 500,
   loadAll: false,
 }
