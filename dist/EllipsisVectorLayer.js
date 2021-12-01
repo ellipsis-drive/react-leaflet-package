@@ -150,7 +150,8 @@ const EllipsisVectorLayer = props => {
       layerId: props.layerId,
       zip: true,
       pageSize: Math.min(3000, props.pageSize),
-      styleId: props.styleId
+      styleId: props.styleId,
+      style: props.style
     };
 
     try {
@@ -185,7 +186,7 @@ const EllipsisVectorLayer = props => {
       const pageStart = state.cache[tileId].nextPageStart; //TODO in other packages we use < instead of <=
       //Check if tile is not already fully loaded, and if more features may be loaded
 
-      if (pageStart && state.cache[tileId].amount <= props.maxFeaturesPerTile && state.cache[tileId].size <= props.maxMbPerTile) return {
+      if (pageStart && state.cache[tileId].amount <= props.maxFeaturesPerTile && state.cache[tileId].size <= props.maxMbPerTile * 1000000) return {
         tileId: t,
         pageStart
       };
@@ -199,6 +200,7 @@ const EllipsisVectorLayer = props => {
       zip: true,
       pageSize: Math.min(3000, props.pageSize),
       styleId: props.styleId,
+      style: props.style,
       propertyFilter: props.filter && props.filter > 0 ? props.filter : null
     }; //Get new geometry for the tiles
 
@@ -386,7 +388,7 @@ EllipsisVectorLayer.defaultProps = {
   lineWidth: 5,
   radius: 15,
   maxFeaturesPerTile: 200,
-  maxMbPerTile: 16000000,
+  maxMbPerTile: 16,
   maxTilesInCache: 500,
   loadAll: false
 };
