@@ -67,12 +67,12 @@ function Test() {
         token={token.current}
         mapRef={map}
       /> */}
-        {/* <EllipsisRasterLayer
+        <EllipsisRasterLayer
           blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
           visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'
           captureId={0}
           token={token.current}
-        /> */}
+        />
       </MapContainer>
     </>
   );
