@@ -52,9 +52,49 @@ useEffect(() => {
 | blockId        | id of the block|
 | captureId     | id of the timestamp |
 | visualizationId     | id of the layer |
+| visualization | (Optional) object with method and parameters* for a visualization. Disables visualizationId prop. |
 | maxZoom        | maxZoomlevel of the layer|
 | token        | token of the user (optional)|
+*For the possible methods and parameters of *visualization*, refer to this documentation about it: https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20mapLayers%2Fadd
 
+<details>
+<summary>Or this copied info</summary>
+
+method names: 'contour', 'hillShade', 'vector', 'rgb', 'colorScale' or 'index'.
+
+
+parameters:
+
+for method = bandToColor
+
+{ "bandNumber": <band number as int>, "transitionPoints":[{"color":<color as hex>,"value":<transition value as float>},{"color":<color as hex>,"value":<transition value as float>},{"color":<color as hex>,"value":<transition value as float>}], 'alpha':<float between 0 ad 1>, "period":<periodicity as float>}
+
+or
+
+{ "bandNumber": <band number as int>, "rangeToColor":[{"color":<color as hex>,"fromValue":<start value as float>,"toValue":<end value as float>}], 'alpha':<float between 0 ad 1>, "period":<periodicity as float>}
+
+for method=rgb
+
+{'bands': [{"bandNumber":<band number as int>, "weight": <weight as float>, "bias": <bias af float>, "color":<one of red, green or blue>},{"bandNumber":<band number as int>, "weight": <weight as float>, "bias": <bias af float>, "color":<one of red, green or blue>},{"bandNumber":<band number as int>, "weight": <weight as float>, "bias": <bias af float>, "color":<one of red, green or blue>} ], 'alpha': <flaot between 0 and 1>}
+
+for method = index
+
+{ "positiveBand":{"bandNumber":<band number as int>, "weight":<weight as float>, "bias":<bias as float>},"negativeBand":{"bandNumber":<band number as int>, "weight":<weight as float>, "bias":<bias as float>}, "transitionPoints":[{"color":<color as hex>,"value":<transition value as float>},{"color":<color as hex>,"value":<transition value as float>},{"color":<color as hex>,"value":<transition value as float>}], 'alpha':<float between 0 ad 1>}
+
+or
+
+{ "positiveBand":{"bandNumber":<band number as int>, "weight":<weight as float>, "bias":<bias as float>},"negativeBand":{"bandNumber":<band number as int>, "weight":<weight as float>, "bias":<bias as float>}, "rangeToColor":[{"color":<color as hex>,"fromValue":<start value as float>,"toValue":<end value as float>}], 'alpha':<float between 0 ad 1>}
+
+for method=hillShade
+
+{"angle": <float between 0 and 90>, "bandNumber": <band number as int>, "alpha":<float between 0 and 1>}
+
+for method=vectorField
+
+{"clipValueMin":<value to clip to as float>,"clipValueMax":<value to clip from as float>, "xDirection":{"bandNumber":<band number as int>, "weight":<weight as float>, "bias":<bias as float>}, "yDirection":{"bandNumber":<band number as int>, "weight":<weight as float>, "bias":<bias as float>}}
+
+Each method can have an optional parameter noData. No data must be an array of objects. Each object must have a bandNumber as int, fromValue as float and toValue as float. Pixels for which values is the given bandNumber are between fromValue and toValue are made transparent.
+</details>
 
 #### VectorLayer props
 
@@ -106,14 +146,12 @@ token: string //token to use in other api calls
 expires: number //expiration time in milliseconds
 ```
 
-#### EllipsisApi.getMetadata description
+#### EllipsisApi.getInfo description
 **parameters**
 | name | description | 
 | -- | -- |
-| blockId | The block or shape id of the project. |
-| includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
+| pathId | The id of the block, folder or layer. |
 | user | (Optional) An user object which can contain a token like `user: {token: mytoken}` | 
 
 **return value**
-
-It returns JSON, which depends on the type of map.
+It returns JSON, which depends on the type of the specified object.
