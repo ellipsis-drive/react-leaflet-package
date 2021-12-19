@@ -1,4 +1,8 @@
-const apiUrl = 'https://api.ellipsis-drive.com/v1';
+let apiUrl = 'https://api.ellipsis-drive.com/v1';
+
+export const setApiUrl = (newUrl) => {
+    apiUrl = newUrl;
+}
 
 function CustomError(status, message) {
     var error = Error.call(this, message);
@@ -79,7 +83,15 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 }
 
 const EllipsisApi = {
+    /**
+     * @deprecated Please use getApiUrl() instead.
+     */
     apiUrl: apiUrl,
+    /**
+     * Get the url of the api.
+     * @returns {string}
+     */
+    getApiUrl: () => apiUrl,
 
     /**
      * Send a post request to the ellipsis api.
@@ -103,19 +115,31 @@ const EllipsisApi = {
     },
 
     /**
-     * Get metadata of a specified block.
+     * Get metadata for something stored in your drive.
+     * @param {string} pathId the id of something stored in your drive like a block, shape or folder
+     * @param {{token: string}} user 
+     * @returns metadata of the given map/shape/folder
+     */
+    getInfo: (pathId, user) => {
+        return ellipsisApiManagerFetch('POST', '/info', {pathId}, user);
+    },
+
+    /**
+     * @deprecated The metadata request was ported to an info request. So please use getInfo() instead.
      * @param {string} blockId 
      * @param {boolean} includeDeleted 
      * @param {{token: string}} user 
      * @returns 
      */
-    getMetadata: (blockId, includeDeleted, user) => {
+     getMetadata: (blockId, includeDeleted, user) => {
         let body;
         if(includeDeleted) body = {mapId: blockId, includeDeleted};
         else body = {mapId: blockId};
 
         return ellipsisApiManagerFetch('POST', '/metadata', body, user);
-    }
+    },
+
 }
 
 export default EllipsisApi;
+
