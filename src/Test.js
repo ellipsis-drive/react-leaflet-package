@@ -3,16 +3,15 @@ import EllipsisVectorLayer from './lib/EllipsisVectorLayer';
 import './Test.css';
 import 'leaflet/dist/leaflet.css';
 
-import EllipsisApi from './lib/EllipsisApi';
+import EllipsisApi, {setApiUrl} from './lib/EllipsisApi';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const position = [51.505, -0.09]
 
 
 function Test() {
-
   const username = process.env.REACT_APP_USERNAME;
   const password = process.env.REACT_APP_PASSWORD;
   let token = useRef();
@@ -30,6 +29,13 @@ function Test() {
     });
   }, [password, username])
 
+  const [key, setKey] = useState(0);
+  useEffect(() => {
+    const i = setTimeout(() => {
+      setKey(key+1);
+    }, 10000);
+  });
+ 
   return (
     <>
       <h1 style={{ textAlign: 'center', margin: '20px' }}>Below is a test of the map.</h1>
@@ -47,6 +53,7 @@ function Test() {
       /> */}
 
         <EllipsisVectorLayer
+          key={key}
           blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
           onFeatureClick={(feature, layer) => console.log(feature)}

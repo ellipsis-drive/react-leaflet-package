@@ -52,6 +52,12 @@ export const EllipsisVectorLayer = props => {
   //On mount, start updating the map.
   useEffect(() => {
     handleViewportUpdate();
+    return () => {
+      if(state.gettingVectorsInterval) {
+        clearInterval(state.gettingVectorsInterval);
+        state.gettingVectorsInterval = undefined;
+      }
+    }
     // eslint-disable-next-line
   }, []);
 
@@ -62,7 +68,6 @@ export const EllipsisVectorLayer = props => {
     state.tiles = boundsToTiles(viewport.bounds, state.zoom);
 
     if (state.gettingVectorsInterval) return;
-
     state.gettingVectorsInterval = setInterval(async () => {
       if (state.isLoading) return;
 
@@ -366,8 +371,8 @@ export const EllipsisVectorLayer = props => {
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
   maxZoom: 21,
-  lineWidth: 5,
-  radius: 15,
+  lineWidth: 2,
+  radius: 5,
   maxFeaturesPerTile: 200,
   maxMbPerTile: 16,
   maxTilesInCache: 500,
