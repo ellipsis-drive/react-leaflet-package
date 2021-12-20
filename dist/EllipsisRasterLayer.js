@@ -3,7 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = exports.EllipsisRasterLayer = void 0;
+exports.default = void 0;
+
+require("core-js/modules/es.json.stringify.js");
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -14,10 +16,14 @@ var _EllipsisApi = _interopRequireDefault(require("./EllipsisApi"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const EllipsisRasterLayer = props => {
-  let url = "".concat(_EllipsisApi.default.apiUrl, "/tileService/").concat(props.blockId, "/").concat(props.captureId, "/").concat(props.visualizationId, "/{z}/{x}/{y}");
+  let url;
 
-  if (props.token) {
-    url = url + '?token=' + props.token;
+  if (props.visualization) {
+    url = "".concat(_EllipsisApi.default.getApiUrl(), "/settings/mapLayers/preview/").concat(props.blockId, "/").concat(props.captureId, "/").concat(props.visualization.method, "/{z}/{x}/{y}?parameters=").concat(JSON.stringify(props.visualization.parameters));
+    if (props.token) url += '&token=' + props.token;
+  } else {
+    url = "".concat(_EllipsisApi.default.getApiUrl(), "/tileService/").concat(props.blockId, "/").concat(props.captureId, "/").concat(props.visualizationId, "/{z}/{x}/{y}");
+    if (props.token) url += '?token=' + props.token;
   }
 
   return /*#__PURE__*/_react.default.createElement(_reactLeaflet.TileLayer, {
@@ -30,6 +36,5 @@ const EllipsisRasterLayer = props => {
   });
 };
 
-exports.EllipsisRasterLayer = EllipsisRasterLayer;
 var _default = EllipsisRasterLayer;
 exports.default = _default;

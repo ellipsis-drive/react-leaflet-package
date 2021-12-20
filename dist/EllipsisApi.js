@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.setApiUrl = exports.default = void 0;
 
 require("core-js/modules/es.promise.js");
 
@@ -11,7 +11,13 @@ require("core-js/modules/es.json.stringify.js");
 
 require("core-js/modules/es.string.includes.js");
 
-const apiUrl = 'https://api.ellipsis-drive.com/v1';
+let apiUrl = 'https://api.ellipsis-drive.com/v1';
+
+const setApiUrl = newUrl => {
+  apiUrl = newUrl;
+};
+
+exports.setApiUrl = setApiUrl;
 
 function CustomError(status, message) {
   var error = Error.call(this, message);
@@ -85,7 +91,16 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 }
 
 const EllipsisApi = {
+  /**
+   * @deprecated Please use getApiUrl() instead.
+   */
   apiUrl: apiUrl,
+
+  /**
+   * Get the url of the api.
+   * @returns {string}
+   */
+  getApiUrl: () => apiUrl,
 
   /**
    * Send a post request to the ellipsis api.
@@ -112,7 +127,19 @@ const EllipsisApi = {
   },
 
   /**
-   * Get metadata of a specified block.
+   * Get metadata for something stored in your drive.
+   * @param {string} pathId the id of something stored in your drive like a block, shape or folder
+   * @param {{token: string}} user 
+   * @returns metadata of the given map/shape/folder
+   */
+  getInfo: (pathId, user) => {
+    return ellipsisApiManagerFetch('POST', '/info', {
+      pathId
+    }, user);
+  },
+
+  /**
+   * @deprecated The metadata request was ported to an info request. So please use getInfo() instead.
    * @param {string} blockId 
    * @param {boolean} includeDeleted 
    * @param {{token: string}} user 

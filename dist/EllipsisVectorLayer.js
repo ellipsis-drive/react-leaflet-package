@@ -87,7 +87,13 @@ const EllipsisVectorLayer = props => {
 
 
   (0, _react.useEffect)(() => {
-    handleViewportUpdate(); // eslint-disable-next-line
+    handleViewportUpdate();
+    return () => {
+      if (state.gettingVectorsInterval) {
+        clearInterval(state.gettingVectorsInterval);
+        state.gettingVectorsInterval = undefined;
+      }
+    }; // eslint-disable-next-line
   }, []);
 
   const handleViewportUpdate = () => {
@@ -385,8 +391,8 @@ exports.EllipsisVectorLayer = EllipsisVectorLayer;
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
   maxZoom: 21,
-  lineWidth: 5,
-  radius: 15,
+  lineWidth: 2,
+  radius: 5,
   maxFeaturesPerTile: 200,
   maxMbPerTile: 16,
   maxTilesInCache: 500,
