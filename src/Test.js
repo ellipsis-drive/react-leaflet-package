@@ -3,7 +3,7 @@ import EllipsisVectorLayer from './lib/EllipsisVectorLayer';
 import './Test.css';
 import 'leaflet/dist/leaflet.css';
 
-import EllipsisApi, {setApiUrl} from './lib/EllipsisApi';
+import EllipsisApi from './lib/EllipsisApi';
 
 import { MapContainer, TileLayer } from 'react-leaflet'
 import React, { useEffect, useRef, useState } from 'react';

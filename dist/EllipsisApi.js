@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.setApiUrl = exports.default = void 0;
+exports.default = void 0;
 
 require("core-js/modules/es.promise.js");
 
@@ -12,12 +12,6 @@ require("core-js/modules/es.json.stringify.js");
 require("core-js/modules/es.string.includes.js");
 
 let apiUrl = 'https://api.ellipsis-drive.com/v1';
-
-const setApiUrl = newUrl => {
-  apiUrl = newUrl;
-};
-
-exports.setApiUrl = setApiUrl;
 
 function CustomError(status, message) {
   var error = Error.call(this, message);
@@ -91,6 +85,8 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 }
 
 const EllipsisApi = {
+  setApiUrl: newUrl => apiUrl = newUrl,
+
   /**
    * @deprecated Please use getApiUrl() instead.
    */

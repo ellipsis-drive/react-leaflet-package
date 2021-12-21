@@ -1,8 +1,6 @@
 let apiUrl = 'https://api.ellipsis-drive.com/v1';
 
-export const setApiUrl = (newUrl) => {
-    apiUrl = newUrl;
-}
+
 
 function CustomError(status, message) {
     var error = Error.call(this, message);
@@ -83,6 +81,8 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 }
 
 const EllipsisApi = {
+
+    setApiUrl:(newUrl) => apiUrl = newUrl,
     /**
      * @deprecated Please use getApiUrl() instead.
      */
