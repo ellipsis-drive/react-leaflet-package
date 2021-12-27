@@ -53,13 +53,46 @@ export const EllipsisVectorLayer = props => {
   useEffect(() => {
     handleViewportUpdate();
     return () => {
-      if(state.gettingVectorsInterval) {
+      if (state.gettingVectorsInterval) {
         clearInterval(state.gettingVectorsInterval);
         state.gettingVectorsInterval = undefined;
       }
     }
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    //refresh rendering
+    let features;
+    if (props.loadAll) {
+      features = state.cache;
+    } else {
+      features = state.tiles.flatMap((t) => {
+        const geoTile = state.cache[getTileId(t)];
+        return geoTile ? geoTile.elements : [];
+      });
+    }
+    features.forEach(x => styleGeoJson(x, props.lineWidth, props.radius));
+    handleViewportUpdate();
+  }, [props.lineWidth, props.radius]);
+
+  useEffect(() => {
+    //clear cache and get new data
+    console.log('critical prop change detected, resetting state');
+
+    if (state.isLoading) {
+      //reset after load step is done
+      state.resetState = true;
+      return;
+    }
+    state.cache = [];
+    state.tiles = [];
+    state.nextPageStart = undefined;
+    state.resetState = undefined;
+    update(Date.now());
+    handleViewportUpdate();
+
+  }, [props.blockId, props.layerId, props.styleId, props.style, props.filter, props.centerPoints, props.loadAll]);
 
   const handleViewportUpdate = () => {
     const viewport = getMapBounds();
@@ -72,6 +105,15 @@ export const EllipsisVectorLayer = props => {
       if (state.isLoading) return;
 
       const loadedSomething = await loadStep();
+
+      if (state.resetState) {
+        state.cache = [];
+        state.tiles = [];
+        state.nextPageStart = undefined;
+        state.resetState = undefined;
+        update(Date.now());
+        return;
+      }
       if (!loadedSomething) {
         clearInterval(state.gettingVectorsInterval);
         state.gettingVectorsInterval = undefined;

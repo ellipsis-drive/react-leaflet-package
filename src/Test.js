@@ -29,13 +29,25 @@ function Test() {
     });
   }, [password, username])
 
-  const [key, setKey] = useState(0);
+  const [width, setWidth] = useState(3);
+  const [style, setStyle] = useState('a30d5d0e-26a3-43a7-9d23-638cef7600c4');
+
   useEffect(() => {
-    const i = setTimeout(() => {
-      setKey(key+1);
+    const i = setInterval(() => {
+      setWidth(Math.random() * 20);
+      console.log(`width changed`);
+    }, 2000);
+    return () => clearInterval(i);
+  })
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (!style) setStyle('a30d5d0e-26a3-43a7-9d23-638cef7600c4');
+      else setStyle(undefined);
+      console.log(`set style to ${style}`);
     }, 10000);
-  });
- 
+  }, [style]);
+
   return (
     <>
       <h1 style={{ textAlign: 'center', margin: '20px' }}>Below is a test of the map.</h1>
@@ -53,11 +65,11 @@ function Test() {
       /> */}
 
         <EllipsisVectorLayer
-          key={key}
           blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
+          styleId={style}
+          lineWidth={width}
           onFeatureClick={(feature, layer) => console.log(feature)}
-        // loadAll={true}
         />
 
         {/* <EllipsisVectorLayer
@@ -67,12 +79,12 @@ function Test() {
         token={token.current}
         mapRef={map}
       /> */}
-        <EllipsisRasterLayer
+        {/* <EllipsisRasterLayer
           blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
           visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'
           captureId={0}
           token={token.current}
-        />
+        /> */}
       </MapContainer>
     </>
   );
