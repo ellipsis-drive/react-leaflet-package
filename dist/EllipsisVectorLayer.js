@@ -7,21 +7,19 @@ exports.default = exports.EllipsisVectorLayer = void 0;
 
 require("core-js/modules/web.dom-collections.iterator.js");
 
+require("core-js/modules/es.array.flat-map.js");
+
+require("core-js/modules/es.array.unscopables.flat-map.js");
+
 require("core-js/modules/es.promise.js");
 
 require("core-js/modules/es.array.sort.js");
 
 require("core-js/modules/es.regexp.exec.js");
 
-require("core-js/modules/es.regexp.test.js");
-
 require("core-js/modules/es.parse-int.js");
 
 require("core-js/modules/es.string.ends-with.js");
-
-require("core-js/modules/es.array.flat-map.js");
-
-require("core-js/modules/es.array.unscopables.flat-map.js");
 
 require("core-js/modules/es.string.starts-with.js");
 
@@ -95,6 +93,39 @@ const EllipsisVectorLayer = props => {
       }
     }; // eslint-disable-next-line
   }, []);
+  (0, _react.useEffect)(() => {
+    //refresh rendering
+    let features;
+
+    if (props.loadAll) {
+      features = state.cache;
+    } else {
+      features = state.tiles.flatMap(t => {
+        const geoTile = state.cache[getTileId(t)];
+        return geoTile ? geoTile.elements : [];
+      });
+    }
+
+    features.forEach(x => styleGeoJson(x, props.lineWidth, props.radius));
+    handleViewportUpdate();
+  }, [props.lineWidth, props.radius]);
+  (0, _react.useEffect)(() => {
+    //clear cache and get new data
+    console.log('critical prop change detected, resetting state');
+
+    if (state.isLoading) {
+      //reset after load step is done
+      state.resetState = true;
+      return;
+    }
+
+    state.cache = [];
+    state.tiles = [];
+    state.nextPageStart = undefined;
+    state.resetState = undefined;
+    update(Date.now());
+    handleViewportUpdate();
+  }, [props.blockId, props.layerId, props.styleId, props.style, props.filter, props.centerPoints, props.loadAll]);
 
   const handleViewportUpdate = () => {
     const viewport = getMapBounds();
@@ -105,6 +136,15 @@ const EllipsisVectorLayer = props => {
     state.gettingVectorsInterval = setInterval(async () => {
       if (state.isLoading) return;
       const loadedSomething = await loadStep();
+
+      if (state.resetState) {
+        state.cache = [];
+        state.tiles = [];
+        state.nextPageStart = undefined;
+        state.resetState = undefined;
+        update(Date.now());
+        return;
+      }
 
       if (!loadedSomething) {
         clearInterval(state.gettingVectorsInterval);
@@ -264,18 +304,19 @@ const EllipsisVectorLayer = props => {
     const type = geoJson.geometry.type;
     const properties = geoJson.properties;
     const color = properties.color;
-    const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
-    properties.style = {}; //Parse color and opacity
+    let hex = '000000',
+        alpha = 0.5; //default to black, with 25% opacity
 
-    if (isHexColorFormat && color.length === 9) {
-      properties.style.fillOpacity = parseInt(color.substring(8, 10), 16) / 25.5;
-      properties.style.color = color.substring(0, 7);
-    } else {
-      properties.style.fillOpacity = 0.6;
-      properties.style.color = color;
-    } //TODO: weight default on 8 for LineString and MultiLineString, and 2 for Points?
-    //Parse line width
+    if (color) {
+      const splitHexComponents = /^#([a-f\d]{6})([a-f\d]{2})?$/i.exec(color);
+      hex = splitHexComponents[1];
+      alpha = parseInt(splitHexComponents[2], 16) / 255;
+      if (isNaN(alpha)) alpha = 0.5;
+    }
 
+    properties.style = {};
+    properties.style.fillOpacity = alpha;
+    properties.style.color = "#".concat(hex); //Parse line width
 
     if (type.endsWith('Point')) {
       properties.style.radius = radius;
