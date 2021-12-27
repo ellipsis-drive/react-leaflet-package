@@ -267,21 +267,18 @@ export const EllipsisVectorLayer = props => {
     const type = geoJson.geometry.type;
     const properties = geoJson.properties;
     const color = properties.color;
-    const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
+
+    let hex = '000000', alpha = 0.5; //default to black, with 25% opacity
+    if (color) {
+      const splitHexComponents = /^#([a-f\d]{6})([a-f\d]{2})?$/i.exec(color);
+      hex = splitHexComponents[1];
+      alpha = parseInt(splitHexComponents[2], 16) / 255;
+      if (isNaN(alpha)) alpha = 0.5;
+    }
 
     properties.style = {};
-
-    //Parse color and opacity
-    if (isHexColorFormat && color.length === 9) {
-      properties.style.fillOpacity = parseInt(color.substring(8, 10), 16) / 25.5;
-      properties.style.color = color.substring(0, 7);
-    }
-    else {
-      properties.style.fillOpacity = 0.6;
-      properties.style.color = color;
-    }
-
-    //TODO: weight default on 8 for LineString and MultiLineString, and 2 for Points?
+    properties.style.fillOpacity = alpha;
+    properties.style.color = `#${hex}`;
 
     //Parse line width
     if (type.endsWith('Point')) {
