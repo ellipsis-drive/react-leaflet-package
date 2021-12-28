@@ -308,7 +308,7 @@ const EllipsisVectorLayer = props => {
         alpha = 0.5; //default to black, with 25% opacity
 
     if (color) {
-      const splitHexComponents = /^#([a-f\d]{6})([a-f\d]{2})?$/i.exec(color);
+      const splitHexComponents = /^#?([a-f\d]{6})([a-f\d]{2})?$/i.exec(color);
       hex = splitHexComponents[1];
       alpha = parseInt(splitHexComponents[2], 16) / 255;
       if (isNaN(alpha)) alpha = 0.5;
