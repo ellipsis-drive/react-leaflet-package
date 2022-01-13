@@ -53,6 +53,7 @@ export const EllipsisVectorLayer = props => {
   //On mount, start updating the map.
   useEffect(() => {
     requestLayerInfo().then(() => {
+      readStylingInfo();
       handleViewportUpdate();
     });
     return () => {
@@ -68,33 +69,42 @@ export const EllipsisVectorLayer = props => {
     //clear cache and get new data
     console.log('critical prop change detected, resetting state');
     resetState();
+    // eslint-disable-next-line
   }, [props.filter, props.centerPoints, props.loadAll]);
 
   useEffect(() => {
     requestLayerInfo().then(() => resetState());
+    // eslint-disable-next-line
   }, [props.blockId, props.layerId, props.token]);
 
   useEffect(() => {
     recompileStyle();
+    // eslint-disable-next-line
   }, [props.lineWidth, props.radius, props.style, props.styleId]);
 
   useEffect(() => {
-    if (!props.styleId) {
-      state.styleInfo = undefined;
-      resetState();
+    readStylingInfo();
+    resetState();
+    // eslint-disable-next-line
+  }, [props.styleId]);
+
+  const readStylingInfo = () => {
+    if (!props.styleId && props.style) {
+      state.styleInfo = props.style ? extractStyling(props.style) : undefined;
       return;
     }
     if (!state.layerInfo || !state.layerInfo.styles) {
-      console.error('no layer info or styles present');
+      state.styleInfo = undefined;
       return;
     }
     //Get width and opacity from layer info style.
-    state.styleInfo = extractStyling(state.layerInfo.styles.find(s =>
-      s.id === props.styleId || (s.isDefault && !props.styleId)
-    ), { width: [], opacity: ['alpha'] });
-    resetState();
-  }, [props.styleId]);
-
+    const apiStylingObject = state.layerInfo.styles.find(s =>
+      s.id === props.styleId || (s.isDefault && !props.styleId));
+    state.styleInfo = apiStylingObject && apiStylingObject.parameters ?
+      extractStyling(apiStylingObject.parameters, {
+        width: []
+      }) : undefined;
+  }
 
   const requestLayerInfo = async () => {
     try {
@@ -347,7 +357,7 @@ export const EllipsisVectorLayer = props => {
   };
 
   const compileStyle = (feature) => {
-    let compiledStyle = getFeatureStyling(feature, state.styleInfo, props.style, props);
+    let compiledStyle = getFeatureStyling(feature, state.styleInfo, props);
     compiledStyle = extractStyling(compiledStyle, {
       radius: [],
       weight: ['width'],
@@ -380,7 +390,6 @@ export const EllipsisVectorLayer = props => {
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return <></>;
     const features = getFeatures();
-    console.log(features);
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
       //Check for (Multi)Polygons and (Multi)LineStrings
