@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
 import { getFeatureStyling, extractStyling } from './util/VectorLayerUtil';
@@ -52,7 +52,9 @@ export const EllipsisVectorLayer = props => {
 
   //On mount, start updating the map.
   useEffect(() => {
-    handleViewportUpdate();
+    requestLayerInfo().then(() => {
+      handleViewportUpdate();
+    });
     return () => {
       if (state.gettingVectorsInterval) {
         clearInterval(state.gettingVectorsInterval);
@@ -63,24 +65,52 @@ export const EllipsisVectorLayer = props => {
   }, []);
 
   useEffect(() => {
-    //refresh rendering
-    let features;
-    if (props.loadAll) {
-      features = state.cache;
-    } else {
-      features = state.tiles.flatMap((t) => {
-        const geoTile = state.cache[getTileId(t)];
-        return geoTile ? geoTile.elements : [];
-      });
-    }
-    features.forEach(x => styleGeoJson(x, props.lineWidth, props.radius));
-    handleViewportUpdate();
-  }, [props.lineWidth, props.radius]);
-
-  useEffect(() => {
     //clear cache and get new data
     console.log('critical prop change detected, resetting state');
+    resetState();
+  }, [props.filter, props.centerPoints, props.loadAll]);
 
+  useEffect(() => {
+    requestLayerInfo().then(() => resetState());
+  }, [props.blockId, props.layerId, props.token]);
+
+  useEffect(() => {
+    recompileStyle();
+  }, [props.lineWidth, props.radius, props.style, props.styleId]);
+
+  useEffect(() => {
+    if (!props.styleId) {
+      state.styleInfo = undefined;
+      resetState();
+      return;
+    }
+    if (!state.layerInfo || !state.layerInfo.styles) {
+      console.error('no layer info or styles present');
+      return;
+    }
+    //Get width and opacity from layer info style.
+    state.styleInfo = extractStyling(state.layerInfo.styles.find(s =>
+      s.id === props.styleId || (s.isDefault && !props.styleId)
+    ), { width: [], opacity: ['alpha'] });
+    resetState();
+  }, [props.styleId]);
+
+
+  const requestLayerInfo = async () => {
+    try {
+      const info = await EllipsisApi.getInfo(props.blockId, { token: props.token });
+      if (!info.geometryLayers) return;
+      const layerInfo = info.geometryLayers.find(x => x.id === props.layerId);
+      state.maxZoom = layerInfo.zoom;
+      if (layerInfo)
+        state.layerInfo = layerInfo;
+    } catch (e) {
+      console.error('could not retreive layer info');
+    }
+  }
+
+  //Reset all cached info. Will always continue loading.
+  const resetState = () => {
     if (state.isLoading) {
       //reset after load step is done
       state.resetState = true;
@@ -92,13 +122,31 @@ export const EllipsisVectorLayer = props => {
     state.resetState = undefined;
     update(Date.now());
     handleViewportUpdate();
+  }
 
-  }, [props.blockId, props.layerId, props.styleId, props.style, props.filter, props.centerPoints, props.loadAll]);
+  const recompileStyle = () => {
+    getFeatures().forEach(x => compileStyle(x));
+    handleViewportUpdate();
+  }
+
+
+  const getFeatures = () => {
+    let features = [];
+    if (props.loadAll) {
+      features = state.cache;
+    } else {
+      features = state.tiles.flatMap((t) => {
+        const geoTile = state.cache[getTileId(t)];
+        return geoTile ? geoTile.elements : [];
+      });
+    }
+    return features;
+  }
 
   const handleViewportUpdate = () => {
     const viewport = getMapBounds();
     if (!viewport) return;
-    state.zoom = Math.max(Math.min(props.maxZoom, viewport.zoom - 2), 0);
+    state.zoom = Math.max(Math.min(props.maxZoom === undefined ? state.maxZoom : props.maxZoom, viewport.zoom - 2), 0);
     state.tiles = boundsToTiles(viewport.bounds, state.zoom);
 
     if (state.gettingVectorsInterval) return;
@@ -108,11 +156,7 @@ export const EllipsisVectorLayer = props => {
       const loadedSomething = await loadStep();
 
       if (state.resetState) {
-        state.cache = [];
-        state.tiles = [];
-        state.nextPageStart = undefined;
-        state.resetState = undefined;
-        update(Date.now());
+        resetState();
         return;
       }
       if (!loadedSomething) {
@@ -262,35 +306,6 @@ export const EllipsisVectorLayer = props => {
 
   const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${props.centerPoints ? 'center' : 'geometry'}_${props.styleId ? props.styleId : 'nostyle'}_${index}`;
 
-  const styleGeoJson = (geoJson, weight, radius) => {
-    console.log(geoJson);
-
-    if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
-
-    const type = geoJson.geometry.type;
-    const properties = geoJson.properties;
-    const color = properties.color;
-
-    let hex = '000000', alpha = 0.5; //default to black, with 25% opacity
-    if (color) {
-      const splitHexComponents = /^#?([a-f\d]{6})([a-f\d]{2})?$/i.exec(color);
-      hex = splitHexComponents[1];
-      alpha = parseInt(splitHexComponents[2], 16) / 255;
-      if (isNaN(alpha)) alpha = 0.5;
-    }
-
-    properties.compiledStyle = {};
-    properties.compiledStyle.fillOpacity = alpha;
-    properties.compiledStyle.color = `#${hex}`;
-
-    //Parse line width
-    if (type.endsWith('Point')) {
-      properties.compiledStyle.radius = radius;
-      properties.compiledStyle.weight = 2;
-    }
-    else properties.compiledStyle.weight = weight;
-  };
-
   const boundsToTiles = (bounds, zoom) => {
     const xMin = Math.max(bounds.xMin, -180);
     const xMax = Math.min(bounds.xMax, 180);
@@ -332,7 +347,7 @@ export const EllipsisVectorLayer = props => {
   };
 
   const compileStyle = (feature) => {
-    let compiledStyle = getFeatureStyling(feature, props);
+    let compiledStyle = getFeatureStyling(feature, state.styleInfo, props.style, props);
     compiledStyle = extractStyling(compiledStyle, {
       radius: [],
       weight: ['width'],
@@ -364,20 +379,8 @@ export const EllipsisVectorLayer = props => {
 
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return <></>;
-    let features;
-    if (props.loadAll) {
-      features = state.cache;
-    } else {
-      features = state.tiles.flatMap((t) => {
-        const geoTile = state.cache[getTileId(t)];
-        return geoTile ? geoTile.elements : [];
-      });
-    }
-
-    // console.log(features.filter(x => 
-    //   features.filter(y => y.properties.id === x.properties.id).length > 1
-    // ).length > 0);
-
+    const features = getFeatures();
+    console.log(features);
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
       //Check for (Multi)Polygons and (Multi)LineStrings
@@ -409,11 +412,7 @@ export const EllipsisVectorLayer = props => {
           <CircleMarker
             key={getFeatureId(feature, i)}
             center={[coordinate[1], coordinate[0]]}
-            pathOptions={feature.properties.compiledStyle}
-            // color={feature.properties.compiledStyle.color}
-            // opacity={feature.properties.compiledStyle.fillOpacity}
-            radius={feature.properties.compiledStyle.radius}
-            // weight={feature.properties.compiledStyle.weight}
+            {...feature.properties.compiledStyle}
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
           />
@@ -428,7 +427,6 @@ export const EllipsisVectorLayer = props => {
 
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
-  maxZoom: 21,
   maxFeaturesPerTile: 200,
   maxMbPerTile: 16,
   maxTilesInCache: 500,

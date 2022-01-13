@@ -35,7 +35,7 @@ const parseHex = (color, toRGB) => {
 
 //Finds styling info based on styleKeysInfo. It'll return all style info with the style
 //keys described in styleKeysInfo.
-const extractStyling = (obj, styleKeysInfo = styleKeys) => {
+const extractStyling = (obj = {}, styleKeysInfo = styleKeys) => {
     const styling = {};
     Object.entries(obj).forEach(([key, value]) => {
         const standardStylingEntry = Object.entries(styleKeysInfo).find(([styleKey, styleAliases]) => {
@@ -61,15 +61,13 @@ const extractStyling = (obj, styleKeysInfo = styleKeys) => {
  * @param {*} stylingOptions 
  * @returns {*}
  */
-const getFeatureStyling = (feature, stylingOptions) => {
+const getFeatureStyling = (feature, ...stylingSources) => {
 
-    //Extract style info from feature.properties, feature.properties.style and stylingOptions.
+    //Extract style info from feature.properties, getinfo.style and stylingOptions.
     const propertyStyle = feature && feature.properties ? extractStyling(feature.properties) : undefined;
-    const propertyStyleStyle = feature && feature.properties && feature.properties.style ? extractStyling(feature.properties.style) : undefined;
-    const options = stylingOptions ? extractStyling(stylingOptions) : undefined;
 
     //Rightmost value will take precidence over values to the left in merge.
-    let combinedStyles = mergeObjects(propertyStyle, propertyStyleStyle, options);
+    let combinedStyles = mergeObjects(propertyStyle, ...stylingSources.map(x => x ? extractStyling(x) : undefined));
 
 
     //Split hex values in opacity and hex value if possible.
