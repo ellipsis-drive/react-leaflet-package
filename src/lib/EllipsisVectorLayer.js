@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
+import { getFeatureStyling, extractStyling } from './util/VectorLayerUtil';
 
 import EllipsisApi from './EllipsisApi';
 
@@ -175,7 +176,7 @@ export const EllipsisVectorLayer = props => {
         state.nextPageStart = 4; //EOT
       if (res.result && res.result.features) {
         res.result.features.forEach(x => {
-          styleGeoJson(x, props.lineWidth, props.radius);
+          compileStyle(x);
           state.cache.push(x);
         });
       }
@@ -250,7 +251,7 @@ export const EllipsisVectorLayer = props => {
       tileData.size = tileData.size + result[j].size;
       tileData.amount = tileData.amount + result[j].result.features.length;
       tileData.nextPageStart = result[j].nextPageStart;
-      result[j].result.features.forEach(x => styleGeoJson(x, props.lineWidth, props.radius));
+      result[j].result.features.forEach(x => compileStyle(x));
       tileData.elements = tileData.elements.concat(result[j].result.features);
 
     }
@@ -262,6 +263,8 @@ export const EllipsisVectorLayer = props => {
   const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${props.centerPoints ? 'center' : 'geometry'}_${props.styleId ? props.styleId : 'nostyle'}_${index}`;
 
   const styleGeoJson = (geoJson, weight, radius) => {
+    console.log(geoJson);
+
     if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
 
     const type = geoJson.geometry.type;
@@ -276,16 +279,16 @@ export const EllipsisVectorLayer = props => {
       if (isNaN(alpha)) alpha = 0.5;
     }
 
-    properties.style = {};
-    properties.style.fillOpacity = alpha;
-    properties.style.color = `#${hex}`;
+    properties.compiledStyle = {};
+    properties.compiledStyle.fillOpacity = alpha;
+    properties.compiledStyle.color = `#${hex}`;
 
     //Parse line width
     if (type.endsWith('Point')) {
-      properties.style.radius = radius;
-      properties.style.weight = 2;
+      properties.compiledStyle.radius = radius;
+      properties.compiledStyle.weight = 2;
     }
-    else properties.style.weight = weight;
+    else properties.compiledStyle.weight = weight;
   };
 
   const boundsToTiles = (bounds, zoom) => {
@@ -328,6 +331,21 @@ export const EllipsisVectorLayer = props => {
     return tiles;
   };
 
+  const compileStyle = (feature) => {
+    let compiledStyle = getFeatureStyling(feature, props);
+    compiledStyle = extractStyling(compiledStyle, {
+      radius: [],
+      weight: ['width'],
+      color: ['borderColor'],
+      opacity: ['borderOpacity'],
+      fillColor: [],
+      fillOpacity: []
+    });
+
+    if (!feature.properties) feature.properties = {};
+    feature.properties.compiledStyle = compiledStyle;
+  };
+
   const getMapBounds = () => {
     const map = getMapRef();
     if (!map) return;
@@ -368,7 +386,7 @@ export const EllipsisVectorLayer = props => {
           <GeoJSON
             key={getFeatureId(feature)}
             data={feature}
-            style={feature.properties.style}
+            style={feature.properties.compiledStyle}
             interactive={props.onFeatureClick ? true : false}
             onEachFeature={!props.onFeatureClick ? undefined : (feature, layer) =>
               layer.on('click', () => props.onFeatureClick(feature, layer))
@@ -391,10 +409,11 @@ export const EllipsisVectorLayer = props => {
           <CircleMarker
             key={getFeatureId(feature, i)}
             center={[coordinate[1], coordinate[0]]}
-            color={feature.properties.style.color}
-            opacity={feature.properties.style.fillOpacity}
-            radius={feature.properties.style.radius}
-            weight={feature.properties.style.weight}
+            pathOptions={feature.properties.compiledStyle}
+            // color={feature.properties.compiledStyle.color}
+            // opacity={feature.properties.compiledStyle.fillOpacity}
+            // radius={feature.properties.compiledStyle.radius}
+            // weight={feature.properties.compiledStyle.weight}
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
           />
@@ -410,8 +429,6 @@ export const EllipsisVectorLayer = props => {
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
   maxZoom: 21,
-  lineWidth: 2,
-  radius: 5,
   maxFeaturesPerTile: 200,
   maxMbPerTile: 16,
   maxTilesInCache: 500,

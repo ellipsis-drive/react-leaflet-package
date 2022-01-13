@@ -32,21 +32,21 @@ function Test() {
   const [width, setWidth] = useState(3);
   const [style, setStyle] = useState('a30d5d0e-26a3-43a7-9d23-638cef7600c4');
 
-  useEffect(() => {
-    const i = setInterval(() => {
-      setWidth(Math.random() * 20);
-      console.log(`width changed`);
-    }, 2000);
-    return () => clearInterval(i);
-  })
+  // useEffect(() => {
+  //   const i = setInterval(() => {
+  //     setWidth(Math.random() * 20);
+  //     console.log(`width changed`);
+  //   }, 2000);
+  //   return () => clearInterval(i);
+  // })
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (!style) setStyle('a30d5d0e-26a3-43a7-9d23-638cef7600c4');
-      else setStyle(undefined);
-      console.log(`set style to ${style}`);
-    }, 10000);
-  }, [style]);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (!style) setStyle('a30d5d0e-26a3-43a7-9d23-638cef7600c4');
+  //     else setStyle(undefined);
+  //     console.log(`set style to ${style}`);
+  //   }, 10000);
+  // }, [style]);
 
   return (
     <>
