@@ -421,7 +421,6 @@ const EllipsisVectorLayer = props => {
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
     const features = getCachedFeatures();
-    console.log(features[0]);
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, features.flatMap(feature => {
       const type = feature.geometry.type; //Check for (Multi)Polygons and (Multi)LineStrings
 

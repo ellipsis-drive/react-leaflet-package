@@ -63,6 +63,7 @@ function Test() {
           blockId='b8468235-31b5-4959-91a4-0e52a1d4feb6'
           layerId='44be2542-d20d-457b-b003-698d048d2c6c'
           onFeatureClick={(feature, layer) => console.log(feature)}
+          style={{ "method": "fromColorProperty", "pasting": false, "parameters": { "alpha": 0.5, "width": 2, "radius": { "method": "constant", "parameters": { "value": 100 } }, "defaultColor": "#C75B1C" } }}
         // radius={3}
         />
 
