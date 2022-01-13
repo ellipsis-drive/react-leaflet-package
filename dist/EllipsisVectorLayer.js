@@ -1,5 +1,7 @@
 "use strict";
 
+require("core-js/modules/es.object.assign.js");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -7,15 +9,13 @@ exports.default = exports.EllipsisVectorLayer = void 0;
 
 require("core-js/modules/web.dom-collections.iterator.js");
 
+require("core-js/modules/es.promise.js");
+
 require("core-js/modules/es.array.flat-map.js");
 
 require("core-js/modules/es.array.unscopables.flat-map.js");
 
-require("core-js/modules/es.promise.js");
-
 require("core-js/modules/es.array.sort.js");
-
-require("core-js/modules/es.regexp.exec.js");
 
 require("core-js/modules/es.parse-int.js");
 
@@ -27,6 +27,8 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _reactLeaflet = require("react-leaflet");
 
+var _VectorLayerUtil = require("./util/VectorLayerUtil");
+
 var _EllipsisApi = _interopRequireDefault(require("./EllipsisApi"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -34,6 +36,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 const reactLeaflet = require('react-leaflet');
 
@@ -85,7 +89,10 @@ const EllipsisVectorLayer = props => {
 
 
   (0, _react.useEffect)(() => {
-    handleViewportUpdate();
+    requestLayerInfo().then(() => {
+      readStylingInfo();
+      handleViewportUpdate();
+    });
     return () => {
       if (state.gettingVectorsInterval) {
         clearInterval(state.gettingVectorsInterval);
@@ -94,25 +101,55 @@ const EllipsisVectorLayer = props => {
     }; // eslint-disable-next-line
   }, []);
   (0, _react.useEffect)(() => {
-    //refresh rendering
-    let features;
-
-    if (props.loadAll) {
-      features = state.cache;
-    } else {
-      features = state.tiles.flatMap(t => {
-        const geoTile = state.cache[getTileId(t)];
-        return geoTile ? geoTile.elements : [];
-      });
-    }
-
-    features.forEach(x => styleGeoJson(x, props.lineWidth, props.radius));
-    handleViewportUpdate();
-  }, [props.lineWidth, props.radius]);
-  (0, _react.useEffect)(() => {
     //clear cache and get new data
     console.log('critical prop change detected, resetting state');
+    resetState(); // eslint-disable-next-line
+  }, [props.filter, props.centerPoints, props.loadAll]);
+  (0, _react.useEffect)(() => {
+    requestLayerInfo().then(() => resetState()); // eslint-disable-next-line
+  }, [props.blockId, props.layerId, props.token]);
+  (0, _react.useEffect)(() => {
+    recompileStyle(); // eslint-disable-next-line
+  }, [props.lineWidth, props.radius, props.style, props.styleId]);
+  (0, _react.useEffect)(() => {
+    readStylingInfo();
+    resetState(); // eslint-disable-next-line
+  }, [props.styleId]);
 
+  const readStylingInfo = () => {
+    if (!props.styleId && props.style) {
+      state.styleInfo = props.style ? (0, _VectorLayerUtil.extractStyling)(props.style) : undefined;
+      return;
+    }
+
+    if (!state.layerInfo || !state.layerInfo.styles) {
+      state.styleInfo = undefined;
+      return;
+    } //Get width and opacity from layer info style.
+
+
+    const apiStylingObject = state.layerInfo.styles.find(s => s.id === props.styleId || s.isDefault && !props.styleId);
+    state.styleInfo = apiStylingObject && apiStylingObject.parameters ? (0, _VectorLayerUtil.extractStyling)(apiStylingObject.parameters, {
+      width: []
+    }) : undefined;
+  };
+
+  const requestLayerInfo = async () => {
+    try {
+      const info = await _EllipsisApi.default.getInfo(props.blockId, {
+        token: props.token
+      });
+      if (!info.geometryLayers) return;
+      const layerInfo = info.geometryLayers.find(x => x.id === props.layerId);
+      state.maxZoom = layerInfo.zoom;
+      if (layerInfo) state.layerInfo = layerInfo;
+    } catch (e) {
+      console.error('could not retreive layer info');
+    }
+  }; //Reset all cached info. Will always continue loading.
+
+
+  const resetState = () => {
     if (state.isLoading) {
       //reset after load step is done
       state.resetState = true;
@@ -125,12 +162,32 @@ const EllipsisVectorLayer = props => {
     state.resetState = undefined;
     update(Date.now());
     handleViewportUpdate();
-  }, [props.blockId, props.layerId, props.styleId, props.style, props.filter, props.centerPoints, props.loadAll]);
+  };
+
+  const recompileStyle = () => {
+    getFeatures().forEach(x => compileStyle(x));
+    handleViewportUpdate();
+  };
+
+  const getFeatures = () => {
+    let features = [];
+
+    if (props.loadAll) {
+      features = state.cache;
+    } else {
+      features = state.tiles.flatMap(t => {
+        const geoTile = state.cache[getTileId(t)];
+        return geoTile ? geoTile.elements : [];
+      });
+    }
+
+    return features;
+  };
 
   const handleViewportUpdate = () => {
     const viewport = getMapBounds();
     if (!viewport) return;
-    state.zoom = Math.max(Math.min(props.maxZoom, viewport.zoom - 2), 0);
+    state.zoom = Math.max(Math.min(props.maxZoom === undefined ? state.maxZoom : props.maxZoom, viewport.zoom - 2), 0);
     state.tiles = boundsToTiles(viewport.bounds, state.zoom);
     if (state.gettingVectorsInterval) return;
     state.gettingVectorsInterval = setInterval(async () => {
@@ -138,11 +195,7 @@ const EllipsisVectorLayer = props => {
       const loadedSomething = await loadStep();
 
       if (state.resetState) {
-        state.cache = [];
-        state.tiles = [];
-        state.nextPageStart = undefined;
-        state.resetState = undefined;
-        update(Date.now());
+        resetState();
         return;
       }
 
@@ -209,7 +262,7 @@ const EllipsisVectorLayer = props => {
 
       if (res.result && res.result.features) {
         res.result.features.forEach(x => {
-          styleGeoJson(x, props.lineWidth, props.radius);
+          compileStyle(x);
           state.cache.push(x);
         });
       }
@@ -285,7 +338,7 @@ const EllipsisVectorLayer = props => {
       tileData.size = tileData.size + result[j].size;
       tileData.amount = tileData.amount + result[j].result.features.length;
       tileData.nextPageStart = result[j].nextPageStart;
-      result[j].result.features.forEach(x => styleGeoJson(x, props.lineWidth, props.radius));
+      result[j].result.features.forEach(x => compileStyle(x));
       tileData.elements = tileData.elements.concat(result[j].result.features);
     }
 
@@ -297,31 +350,6 @@ const EllipsisVectorLayer = props => {
   const getFeatureId = function getFeatureId(feature) {
     let index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     return "".concat(feature.properties.id, "_").concat(props.centerPoints ? 'center' : 'geometry', "_").concat(props.styleId ? props.styleId : 'nostyle', "_").concat(index);
-  };
-
-  const styleGeoJson = (geoJson, weight, radius) => {
-    if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
-    const type = geoJson.geometry.type;
-    const properties = geoJson.properties;
-    const color = properties.color;
-    let hex = '000000',
-        alpha = 0.5; //default to black, with 25% opacity
-
-    if (color) {
-      const splitHexComponents = /^#?([a-f\d]{6})([a-f\d]{2})?$/i.exec(color);
-      hex = splitHexComponents[1];
-      alpha = parseInt(splitHexComponents[2], 16) / 255;
-      if (isNaN(alpha)) alpha = 0.5;
-    }
-
-    properties.style = {};
-    properties.style.fillOpacity = alpha;
-    properties.style.color = "#".concat(hex); //Parse line width
-
-    if (type.endsWith('Point')) {
-      properties.style.radius = radius;
-      properties.style.weight = 2;
-    } else properties.style.weight = weight;
   };
 
   const boundsToTiles = (bounds, zoom) => {
@@ -353,6 +381,20 @@ const EllipsisVectorLayer = props => {
     return tiles;
   };
 
+  const compileStyle = feature => {
+    let compiledStyle = (0, _VectorLayerUtil.getFeatureStyling)(feature, state.styleInfo, props);
+    compiledStyle = (0, _VectorLayerUtil.extractStyling)(compiledStyle, {
+      radius: [],
+      weight: ['width'],
+      color: ['borderColor'],
+      opacity: ['borderOpacity'],
+      fillColor: [],
+      fillOpacity: []
+    });
+    if (!feature.properties) feature.properties = {};
+    feature.properties.compiledStyle = compiledStyle;
+  };
+
   const getMapBounds = () => {
     const map = getMapRef();
     if (!map) return;
@@ -373,20 +415,7 @@ const EllipsisVectorLayer = props => {
 
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
-    let features;
-
-    if (props.loadAll) {
-      features = state.cache;
-    } else {
-      features = state.tiles.flatMap(t => {
-        const geoTile = state.cache[getTileId(t)];
-        return geoTile ? geoTile.elements : [];
-      });
-    } // console.log(features.filter(x => 
-    //   features.filter(y => y.properties.id === x.properties.id).length > 1
-    // ).length > 0);
-
-
+    const features = getFeatures();
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, features.flatMap(feature => {
       const type = feature.geometry.type; //Check for (Multi)Polygons and (Multi)LineStrings
 
@@ -394,7 +423,7 @@ const EllipsisVectorLayer = props => {
         return [/*#__PURE__*/_react.default.createElement(_reactLeaflet.GeoJSON, {
           key: getFeatureId(feature),
           data: feature,
-          style: feature.properties.style,
+          style: feature.properties.compiledStyle,
           interactive: props.onFeatureClick ? true : false,
           onEachFeature: !props.onFeatureClick ? undefined : (feature, layer) => layer.on('click', () => props.onFeatureClick(feature, layer))
         })];
@@ -409,16 +438,13 @@ const EllipsisVectorLayer = props => {
           position: [coordinate[1], coordinate[0]],
           interactive: props.onFeatureClick ? true : false,
           onClick: !props.onFeatureClick ? undefined : e => props.onFeatureClick(feature, e)
-        }) : /*#__PURE__*/_react.default.createElement(_reactLeaflet.CircleMarker, {
+        }) : /*#__PURE__*/_react.default.createElement(_reactLeaflet.CircleMarker, _extends({
           key: getFeatureId(feature, i),
-          center: [coordinate[1], coordinate[0]],
-          color: feature.properties.style.color,
-          opacity: feature.properties.style.fillOpacity,
-          radius: feature.properties.style.radius,
-          weight: feature.properties.style.weight,
+          center: [coordinate[1], coordinate[0]]
+        }, feature.properties.compiledStyle, {
           interactive: props.onFeatureClick ? true : false,
           onClick: !props.onFeatureClick ? undefined : e => props.onFeatureClick(feature, e)
-        }));
+        })));
       }
 
       return [];
@@ -431,9 +457,6 @@ const EllipsisVectorLayer = props => {
 exports.EllipsisVectorLayer = EllipsisVectorLayer;
 EllipsisVectorLayer.defaultProps = {
   pageSize: 25,
-  maxZoom: 21,
-  lineWidth: 2,
-  radius: 5,
   maxFeaturesPerTile: 200,
   maxMbPerTile: 16,
   maxTilesInCache: 500,
