@@ -84,7 +84,7 @@ export const EllipsisVectorLayer = props => {
 
   useEffect(() => {
     readStylingInfo();
-    resetState();
+    recompileStyle();
     // eslint-disable-next-line
   }, [props.styleId]);
 

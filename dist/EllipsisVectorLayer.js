@@ -113,7 +113,7 @@ const EllipsisVectorLayer = props => {
   }, [props.lineWidth, props.radius, props.style, props.styleId]);
   (0, _react.useEffect)(() => {
     readStylingInfo();
-    resetState(); // eslint-disable-next-line
+    recompileStyle(); // eslint-disable-next-line
   }, [props.styleId]);
 
   const readStylingInfo = () => {
