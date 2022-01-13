@@ -39,6 +39,12 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 const reactLeaflet = require('react-leaflet');
 
 let useLeaflet = reactLeaflet.useLeaflet;
@@ -117,8 +123,12 @@ const EllipsisVectorLayer = props => {
   }, [props.styleId, props.style]); //Reads relevant styling info from state.layerInfo. Sets this in state.styleInfo.
 
   const readStylingInfo = () => {
+    const apiStyleObjectKeys = _objectSpread({}, _VectorLayerUtil.styleKeys);
+
+    delete apiStyleObjectKeys.radius;
+
     if (!props.styleId && props.style) {
-      state.styleInfo = props.style ? (0, _VectorLayerUtil.extractStyling)(props.style.parameters) : undefined; // console.log(props.style);
+      state.styleInfo = props.style ? (0, _VectorLayerUtil.extractStyling)(props.style.parameters, apiStyleObjectKeys) : undefined; // console.log(props.style);
 
       return;
     }
@@ -130,9 +140,7 @@ const EllipsisVectorLayer = props => {
 
 
     const apiStylingObject = state.layerInfo.styles.find(s => s.id === props.styleId || s.isDefault && !props.styleId);
-    state.styleInfo = apiStylingObject && apiStylingObject.parameters ? (0, _VectorLayerUtil.extractStyling)(apiStylingObject.parameters, {
-      width: []
-    }) : undefined;
+    state.styleInfo = apiStylingObject && apiStylingObject.parameters ? (0, _VectorLayerUtil.extractStyling)(apiStylingObject.parameters, apiStyleObjectKeys) : undefined;
   }; //Requests layer info for layer with id layerId. Sets this in state.layerInfo.
 
 
@@ -412,8 +420,8 @@ const EllipsisVectorLayer = props => {
 
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
-    const features = getCachedFeatures(); // console.log(features[0]);
-
+    const features = getCachedFeatures();
+    console.log(features[0]);
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, features.flatMap(feature => {
       const type = feature.geometry.type; //Check for (Multi)Polygons and (Multi)LineStrings
 

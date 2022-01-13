@@ -87,11 +87,9 @@ const extractStyling = function extractStyling() {
  * Parses hex color values from feature to create an object that has all styling
  * parameters merged, which does include default stylings.
  * Priority of the different places to pass styling:
- * 1) stylingOptions
- * 2) feature.properties.style
- * 3) feature.properties
- * 4) default styling
- * if fillcolor and fillopacity are not set, the opacity of colors is used.
+ * 1) ...stylingSources
+ * 2) feature.properties
+ * 3) default styling
  * @param {*} feature 
  * @param {*} stylingOptions 
  * @returns {*}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
-import { getFeatureStyling, extractStyling } from './util/VectorLayerUtil';
+import { getFeatureStyling, extractStyling, styleKeys } from './util/VectorLayerUtil';
 
 import EllipsisApi from './EllipsisApi';
 
@@ -90,8 +90,12 @@ export const EllipsisVectorLayer = props => {
 
   //Reads relevant styling info from state.layerInfo. Sets this in state.styleInfo.
   const readStylingInfo = () => {
+
+    const apiStyleObjectKeys = { ...styleKeys };
+    delete apiStyleObjectKeys.radius;
+
     if (!props.styleId && props.style) {
-      state.styleInfo = props.style ? extractStyling(props.style.parameters) : undefined;
+      state.styleInfo = props.style ? extractStyling(props.style.parameters, apiStyleObjectKeys) : undefined;
       // console.log(props.style);
       return;
     }
@@ -103,9 +107,7 @@ export const EllipsisVectorLayer = props => {
     const apiStylingObject = state.layerInfo.styles.find(s =>
       s.id === props.styleId || (s.isDefault && !props.styleId));
     state.styleInfo = apiStylingObject && apiStylingObject.parameters ?
-      extractStyling(apiStylingObject.parameters, {
-        width: []
-      }) : undefined;
+      extractStyling(apiStylingObject.parameters, apiStyleObjectKeys) : undefined;
   }
 
   //Requests layer info for layer with id layerId. Sets this in state.layerInfo.
@@ -387,7 +389,7 @@ export const EllipsisVectorLayer = props => {
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return <></>;
     const features = getCachedFeatures();
-    // console.log(features[0]);
+    console.log(features[0]);
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
       //Check for (Multi)Polygons and (Multi)LineStrings

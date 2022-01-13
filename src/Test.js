@@ -32,7 +32,7 @@ function Test() {
   }, [password, username])
 
   const [width, setWidth] = useState(3);
-  const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { defaultColor: '#ffffff', borderColor: '#000000' } });
+  const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { opacity: 0, defaultColor: '#ffffff', borderColor: '#000000' } });
 
   // useEffect(() => {
   //   const i = setInterval(() => {
@@ -45,7 +45,7 @@ function Test() {
   useEffect(() => {
     setTimeout(() => {
       const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
-      setStyle({ method: 'fromColorProperty', parameters: { defaultColor: '#ffffff', borderColor: newStyle } });
+      setStyle({ method: 'fromColorProperty', parameters: { opacity: 1, defaultColor: '#ffffff', borderColor: newStyle } });
       console.log(`set border color to ${newStyle}`);
     }, 10000);
   }, [style]);
