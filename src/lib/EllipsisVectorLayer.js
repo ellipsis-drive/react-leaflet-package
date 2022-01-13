@@ -67,7 +67,6 @@ export const EllipsisVectorLayer = props => {
 
   useEffect(() => {
     //clear cache and get new data
-    console.log('critical prop change detected, resetting state');
     resetState();
     // eslint-disable-next-line
   }, [props.filter, props.centerPoints, props.loadAll]);
@@ -78,19 +77,22 @@ export const EllipsisVectorLayer = props => {
   }, [props.blockId, props.layerId, props.token]);
 
   useEffect(() => {
-    recompileStyle();
+    getCachedFeatures().forEach(x => compileStyle(x));
+    update(Date.now());
     // eslint-disable-next-line
-  }, [props.lineWidth, props.radius, props.style, props.styleId]);
+  }, [props.lineWidth, props.radius]);
 
   useEffect(() => {
     readStylingInfo();
-    recompileStyle();
+    resetState();
     // eslint-disable-next-line
-  }, [props.styleId]);
+  }, [props.styleId, props.style]);
 
+  //Reads relevant styling info from state.layerInfo. Sets this in state.styleInfo.
   const readStylingInfo = () => {
     if (!props.styleId && props.style) {
-      state.styleInfo = props.style ? extractStyling(props.style) : undefined;
+      state.styleInfo = props.style ? extractStyling(props.style.parameters) : undefined;
+      console.log(props.style);
       return;
     }
     if (!state.layerInfo || !state.layerInfo.styles) {
@@ -106,6 +108,7 @@ export const EllipsisVectorLayer = props => {
       }) : undefined;
   }
 
+  //Requests layer info for layer with id layerId. Sets this in state.layerInfo.
   const requestLayerInfo = async () => {
     try {
       const info = await EllipsisApi.getInfo(props.blockId, { token: props.token });
@@ -119,7 +122,7 @@ export const EllipsisVectorLayer = props => {
     }
   }
 
-  //Reset all cached info. Will always continue loading.
+  //Reset all cached info. Will always continue loading after.
   const resetState = () => {
     if (state.isLoading) {
       //reset after load step is done
@@ -134,13 +137,7 @@ export const EllipsisVectorLayer = props => {
     handleViewportUpdate();
   }
 
-  const recompileStyle = () => {
-    getFeatures().forEach(x => compileStyle(x));
-    handleViewportUpdate();
-  }
-
-
-  const getFeatures = () => {
+  const getCachedFeatures = () => {
     let features = [];
     if (props.loadAll) {
       features = state.cache;
@@ -389,7 +386,8 @@ export const EllipsisVectorLayer = props => {
 
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return <></>;
-    const features = getFeatures();
+    const features = getCachedFeatures();
+    console.log(features[0]);
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
       //Check for (Multi)Polygons and (Multi)LineStrings

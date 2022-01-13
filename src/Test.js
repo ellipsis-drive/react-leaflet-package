@@ -8,10 +8,12 @@ import EllipsisApi from './lib/EllipsisApi';
 import { MapContainer, TileLayer } from 'react-leaflet'
 import React, { useEffect, useRef, useState } from 'react';
 
+
 const position = [51.505, -0.09]
 
 
 function Test() {
+
   const username = process.env.REACT_APP_USERNAME;
   const password = process.env.REACT_APP_PASSWORD;
   let token = useRef();
@@ -30,7 +32,7 @@ function Test() {
   }, [password, username])
 
   const [width, setWidth] = useState(3);
-  const [style, setStyle] = useState('a30d5d0e-26a3-43a7-9d23-638cef7600c4');
+  const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { defaultColor: '#ffffff', borderColor: '#000000' } });
 
   // useEffect(() => {
   //   const i = setInterval(() => {
@@ -40,13 +42,13 @@ function Test() {
   //   return () => clearInterval(i);
   // })
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     const newStyle = style ? undefined : 'a30d5d0e-26a3-43a7-9d23-638cef7600c4';
-  //     setStyle(newStyle);
-  //     console.log(`set style to ${newStyle}`);
-  //   }, 10000);
-  // }, [style]);
+  useEffect(() => {
+    setTimeout(() => {
+      const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
+      setStyle({ method: 'fromColorProperty', parameters: { defaultColor: '#ffffff', borderColor: newStyle } });
+      console.log(`set border color to ${newStyle}`);
+    }, 10000);
+  }, [style]);
 
   return (
     <>
@@ -67,7 +69,7 @@ function Test() {
         <EllipsisVectorLayer
           blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
-          styleId={style}
+          style={style}
           onFeatureClick={(feature, layer) => console.log(feature)}
         />
         {/* <EllipsisRasterLayer

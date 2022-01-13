@@ -11,12 +11,12 @@ const defaultStyle = {
 
 //Map style keys to possible aliases
 const styleKeys = {
-    radius: ['radius'],
-    width: ['width', 'lineWidth'],
-    borderColor: ['borderColor', 'color'],
-    borderOpacity: ['borderOpacity', 'opacity'],
-    fillColor: ['fillColor'],
-    fillOpacity: ['fillOpacity']
+    radius: [],
+    width: ['lineWidth'],
+    borderColor: [],
+    borderOpacity: [],
+    fillColor: ['color'],
+    fillOpacity: ['opacity']
 }
 
 const parseHex = (color, toRGB) => {
@@ -38,11 +38,12 @@ const parseHex = (color, toRGB) => {
 const extractStyling = (obj = {}, styleKeysInfo = styleKeys) => {
     const styling = {};
     Object.entries(obj).forEach(([key, value]) => {
-        const standardStylingEntry = Object.entries(styleKeysInfo).find(([styleKey, styleAliases]) => {
+        const standardStylingEntries = Object.entries(styleKeysInfo).filter(([styleKey, styleAliases]) => {
             return styleKey === key || (styleAliases && styleAliases.includes(key));
         });
-        if (standardStylingEntry)
-            styling[standardStylingEntry[0]] = value;
+        if (standardStylingEntries && standardStylingEntries.length) {
+            standardStylingEntries.forEach(([k]) => styling[k] = value)
+        }
     });
     return styling;
 }
