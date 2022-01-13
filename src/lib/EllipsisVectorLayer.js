@@ -412,7 +412,7 @@ export const EllipsisVectorLayer = props => {
             pathOptions={feature.properties.compiledStyle}
             // color={feature.properties.compiledStyle.color}
             // opacity={feature.properties.compiledStyle.fillOpacity}
-            // radius={feature.properties.compiledStyle.radius}
+            radius={feature.properties.compiledStyle.radius}
             // weight={feature.properties.compiledStyle.weight}
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
