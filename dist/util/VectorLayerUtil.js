@@ -32,12 +32,12 @@ const defaultStyle = {
 
 exports.defaultStyle = defaultStyle;
 const styleKeys = {
-  radius: ['radius'],
-  width: ['width', 'lineWidth'],
-  borderColor: ['borderColor', 'color'],
-  borderOpacity: ['borderOpacity', 'opacity'],
-  fillColor: ['fillColor'],
-  fillOpacity: ['fillOpacity']
+  radius: [],
+  width: ['lineWidth'],
+  borderColor: [],
+  borderOpacity: [],
+  fillColor: ['color'],
+  fillOpacity: ['opacity']
 };
 exports.styleKeys = styleKeys;
 
@@ -69,11 +69,17 @@ const extractStyling = function extractStyling() {
   const styling = {};
   Object.entries(obj).forEach(_ref => {
     let [key, value] = _ref;
-    const standardStylingEntry = Object.entries(styleKeysInfo).find(_ref2 => {
+    const standardStylingEntries = Object.entries(styleKeysInfo).filter(_ref2 => {
       let [styleKey, styleAliases] = _ref2;
       return styleKey === key || styleAliases && styleAliases.includes(key);
     });
-    if (standardStylingEntry) styling[standardStylingEntry[0]] = value;
+
+    if (standardStylingEntries && standardStylingEntries.length) {
+      standardStylingEntries.forEach(_ref3 => {
+        let [k] = _ref3;
+        return styling[k] = value;
+      });
+    }
   });
   return styling;
 };
@@ -125,7 +131,7 @@ const getFeatureStyling = function getFeatureStyling(feature) {
     //2) opacities found in style, 
     //3) parsed opacities
     combinedStyles = (0, _Util.mergeObjects)({
-      fillOpacity: parsedFillColor.fillOpacity,
+      fillOpacity: parsedFillColor.opacity,
       borderOpacity: parsedBorderColor.opacity
     }, combinedStyles, {
       fillColor: parsedFillColor.color,

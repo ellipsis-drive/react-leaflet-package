@@ -102,23 +102,24 @@ const EllipsisVectorLayer = props => {
   }, []);
   (0, _react.useEffect)(() => {
     //clear cache and get new data
-    console.log('critical prop change detected, resetting state');
     resetState(); // eslint-disable-next-line
   }, [props.filter, props.centerPoints, props.loadAll]);
   (0, _react.useEffect)(() => {
     requestLayerInfo().then(() => resetState()); // eslint-disable-next-line
   }, [props.blockId, props.layerId, props.token]);
   (0, _react.useEffect)(() => {
-    recompileStyle(); // eslint-disable-next-line
-  }, [props.lineWidth, props.radius, props.style, props.styleId]);
+    getCachedFeatures().forEach(x => compileStyle(x));
+    update(Date.now()); // eslint-disable-next-line
+  }, [props.lineWidth, props.radius]);
   (0, _react.useEffect)(() => {
     readStylingInfo();
-    recompileStyle(); // eslint-disable-next-line
-  }, [props.styleId]);
+    resetState(); // eslint-disable-next-line
+  }, [props.styleId, props.style]); //Reads relevant styling info from state.layerInfo. Sets this in state.styleInfo.
 
   const readStylingInfo = () => {
     if (!props.styleId && props.style) {
-      state.styleInfo = props.style ? (0, _VectorLayerUtil.extractStyling)(props.style) : undefined;
+      state.styleInfo = props.style ? (0, _VectorLayerUtil.extractStyling)(props.style.parameters) : undefined; // console.log(props.style);
+
       return;
     }
 
@@ -132,7 +133,8 @@ const EllipsisVectorLayer = props => {
     state.styleInfo = apiStylingObject && apiStylingObject.parameters ? (0, _VectorLayerUtil.extractStyling)(apiStylingObject.parameters, {
       width: []
     }) : undefined;
-  };
+  }; //Requests layer info for layer with id layerId. Sets this in state.layerInfo.
+
 
   const requestLayerInfo = async () => {
     try {
@@ -146,7 +148,7 @@ const EllipsisVectorLayer = props => {
     } catch (e) {
       console.error('could not retreive layer info');
     }
-  }; //Reset all cached info. Will always continue loading.
+  }; //Reset all cached info. Will always continue loading after.
 
 
   const resetState = () => {
@@ -164,12 +166,7 @@ const EllipsisVectorLayer = props => {
     handleViewportUpdate();
   };
 
-  const recompileStyle = () => {
-    getFeatures().forEach(x => compileStyle(x));
-    handleViewportUpdate();
-  };
-
-  const getFeatures = () => {
+  const getCachedFeatures = () => {
     let features = [];
 
     if (props.loadAll) {
@@ -415,7 +412,8 @@ const EllipsisVectorLayer = props => {
 
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null);
-    const features = getFeatures();
+    const features = getCachedFeatures(); // console.log(features[0]);
+
     return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, features.flatMap(feature => {
       const type = feature.geometry.type; //Check for (Multi)Polygons and (Multi)LineStrings
 

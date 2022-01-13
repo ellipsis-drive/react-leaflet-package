@@ -75,6 +75,7 @@ const getFeatureStyling = (feature, ...stylingSources) => {
     let parsedBorderColor = parseHex(combinedStyles.borderColor);
     let parsedFillColor = parseHex(combinedStyles.fillColor);
 
+
     //If no fill color present, take color from border.
     if (parsedBorderColor && !parsedFillColor) {
         parsedFillColor = { ...parsedBorderColor };
@@ -94,7 +95,7 @@ const getFeatureStyling = (feature, ...stylingSources) => {
         //2) opacities found in style, 
         //3) parsed opacities
         combinedStyles = mergeObjects({
-            fillOpacity: parsedFillColor.fillOpacity,
+            fillOpacity: parsedFillColor.opacity,
             borderOpacity: parsedBorderColor.opacity
         }, combinedStyles, {
             fillColor: parsedFillColor.color,

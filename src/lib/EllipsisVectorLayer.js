@@ -92,7 +92,7 @@ export const EllipsisVectorLayer = props => {
   const readStylingInfo = () => {
     if (!props.styleId && props.style) {
       state.styleInfo = props.style ? extractStyling(props.style.parameters) : undefined;
-      console.log(props.style);
+      // console.log(props.style);
       return;
     }
     if (!state.layerInfo || !state.layerInfo.styles) {
@@ -387,7 +387,7 @@ export const EllipsisVectorLayer = props => {
   const render = () => {
     if (!state.tiles || state.tiles.length === 0) return <></>;
     const features = getCachedFeatures();
-    console.log(features[0]);
+    // console.log(features[0]);
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
       //Check for (Multi)Polygons and (Multi)LineStrings
