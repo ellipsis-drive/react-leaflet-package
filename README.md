@@ -111,8 +111,6 @@ Each method can have an optional parameter noData. No data must be an array of o
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                                               |
 | maxTilesInCache    | The number of tiles to keep in cache. Default 500.                                           |
 | maxFeaturesPerTile | The maximum number of vectors to load per tile. Default 200.                                 |
-| radius [M]         | (Optional) The radius of the points in the layer. Overrides any other radius styling.        |
-| lineWidth [M]      | (Optional) The width/weight of the lines in the layer. Overrides any other width styling.    |
 | loadAll [M]        | Always load all vectors, even if not visible or far away. Default false                      |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
