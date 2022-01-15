@@ -3,8 +3,6 @@ import EllipsisVectorLayer from './lib/EllipsisVectorLayer';
 import './Test.css';
 import 'leaflet/dist/leaflet.css';
 
-import EllipsisApi from './lib/EllipsisApi';
-
 import { MapContainer, TileLayer } from 'react-leaflet'
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -13,23 +11,6 @@ const position = [51.505, -0.09]
 
 
 function Test() {
-
-  const username = process.env.REACT_APP_USERNAME;
-  const password = process.env.REACT_APP_PASSWORD;
-  let token = useRef();
-  useEffect(() => {
-    console.log(React.version);
-    EllipsisApi.login(username, password).then((res) => {
-      console.log(res)
-      token.current = res.token;
-    });
-    EllipsisApi.getMetadata('1a24a1ee-7f39-4d21-b149-88df5a3b633a').then((res) => {
-      console.log(res);
-    });
-    EllipsisApi.getMetadata('0ec49fb8-f577-45de-8e4f-6243fdc62908').then((res) => {
-      console.log(res);
-    });
-  }, [password, username])
 
   const [width, setWidth] = useState(3);
   const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { opacity: 0, defaultColor: '#ffffff', borderColor: '#000000' } });
@@ -45,7 +26,7 @@ function Test() {
   useEffect(() => {
     setTimeout(() => {
       const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
-      setStyle({ method: 'fromColorProperty', parameters: { opacity: 1, defaultColor: '#ffffff', borderColor: newStyle } });
+      setStyle({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: newStyle } });
       console.log(`set border color to ${newStyle}`);
     }, 10000);
   }, [style]);
@@ -64,13 +45,14 @@ function Test() {
           layerId='44be2542-d20d-457b-b003-698d048d2c6c'
           onFeatureClick={(feature, layer) => console.log(feature)}
           style={{ "method": "fromColorProperty", "pasting": false, "parameters": { "alpha": 0.5, "width": 2, "radius": { "method": "constant", "parameters": { "value": 100 } }, "defaultColor": "#C75B1C" } }}
-        // radius={3}
+          radius={3}
         />
 
         <EllipsisVectorLayer
           blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
           style={style}
+          debug={true}
           onFeatureClick={(feature, layer) => console.log(feature)}
         />
         {/* <EllipsisRasterLayer
