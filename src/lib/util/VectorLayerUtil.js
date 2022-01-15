@@ -12,7 +12,7 @@ const defaultStyle = {
 //Map style keys to possible aliases
 const styleKeys = {
     radius: [],
-    width: ['lineWidth'],
+    width: ['lineWidth', 'weight'],
     borderColor: [],
     borderOpacity: [],
     fillColor: ['color'],
