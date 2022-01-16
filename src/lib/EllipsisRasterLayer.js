@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TileLayer } from 'react-leaflet';
-import { RasterLayerUtil, EllipsisApi } from 'ellipsis-js-util';
+import { RasterLayerUtil } from 'ellipsis-js-util';
 
 
 const EllipsisRasterLayer = (props) => {
@@ -18,7 +18,7 @@ const EllipsisRasterLayer = (props) => {
 
   return (
     <TileLayer
-      key={`${props.blockId}_${props.captureId}_${props.visualizationId}`}
+      key={RasterLayerUtil.getLayerId(props)}
       url={url}
       tileSize={256}
       noWrap={true}
