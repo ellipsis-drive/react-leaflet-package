@@ -23,13 +23,13 @@ function Test() {
   //   return () => clearInterval(i);
   // })
 
-  useEffect(() => {
-    setTimeout(() => {
-      const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
-      setStyle({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: newStyle } });
-      console.log(`set border color to ${newStyle}`);
-    }, 10000);
-  }, [style]);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
+  //     setStyle({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: newStyle } });
+  //     console.log(`set border color to ${newStyle}`);
+  //   }, 10000);
+  // }, [style]);
 
   return (
     <>
@@ -45,14 +45,17 @@ function Test() {
           layerId='44be2542-d20d-457b-b003-698d048d2c6c'
           onFeatureClick={(feature, layer) => console.log(feature)}
           style={{ "method": "fromColorProperty", "pasting": false, "parameters": { "alpha": 0.5, "width": 2, "radius": { "method": "constant", "parameters": { "value": 100 } }, "defaultColor": "#C75B1C" } }}
-          radius={3}
+          pageSize={50}
+          radius={19}
         />
 
         <EllipsisVectorLayer
           blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
-          style={style}
-          debug={true}
+          // style={style}
+          // debug={true}
+          fetchInterval={50}
+          pageSize={25}
           onFeatureClick={(feature, layer) => console.log(feature)}
         />
         {/* <EllipsisRasterLayer

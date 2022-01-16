@@ -52,10 +52,6 @@ export const EllipsisVectorLayer = props => {
     };
     base.current.getMapBounds = getMapBounds;
     base.current.updateView = () => {
-      // console.log(base.current.getFeatures()[0]);
-      // console.log(base.current.getFeatures().length);
-      // console.log(base.current.zoom);
-      // console.log(JSON.stringify(base.current.loadingState));
       update(Date.now());
     }
 
@@ -159,6 +155,7 @@ export const EllipsisVectorLayer = props => {
             {...feature.properties.compiledStyle}
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
+            pane={'markerPane'}
           />
         )
       }
