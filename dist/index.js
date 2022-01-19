@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "EllipsisApi", {
   enumerable: true,
   get: function get() {
-    return _EllipsisApi.default;
+    return _ellipsisJsUtil.EllipsisApi;
   }
 });
 Object.defineProperty(exports, "EllipsisRasterLayer", {
@@ -22,10 +22,10 @@ Object.defineProperty(exports, "EllipsisVectorLayer", {
   }
 });
 
-var _EllipsisApi = _interopRequireDefault(require("./EllipsisApi"));
-
 var _EllipsisRasterLayer = _interopRequireDefault(require("./EllipsisRasterLayer"));
 
 var _EllipsisVectorLayer = _interopRequireDefault(require("./EllipsisVectorLayer"));
+
+var _ellipsisJsUtil = require("ellipsis-js-util");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
