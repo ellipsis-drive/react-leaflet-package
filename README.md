@@ -112,6 +112,7 @@ Each method can have an optional parameter noData. No data must be an array of o
 | maxTilesInCache    | The number of tiles to keep in cache. Default 500.                                           |
 | maxFeaturesPerTile | The maximum number of vectors to load per tile. Default 200.                                 |
 | loadAll [M]        | Always load all vectors, even if not visible or far away. Default false                      |
+| fetchInterval      | The interval in ms between finishing a request and starting a new request. Default 0.        |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
