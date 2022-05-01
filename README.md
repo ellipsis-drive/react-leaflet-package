@@ -18,12 +18,12 @@ You can use RasterLayer and VectorLayer within a `<Map/>` component.
 ```jsx
 <Map>
   <EllipsisRasterLayer
-    blockId={blockId}
-    visualizationId={visualizationId}
-    captureId={captureId}
+    pathId={pathId}
+    layer={layerId}
+    timestampId={timestampId}
     maxZoom={maxZoom}
   />
-  <EllipsisVectorLayer blockId={blockId} layerId={layerId} maxZoom={maxZoom} />
+  <EllipsisVectorLayer pathId={pathId} layerId={layerId} maxZoom={maxZoom} />
 </Map>
 ```
 
@@ -44,14 +44,13 @@ useEffect(() => {
 
 #### RasterLayer props
 
-| Name            | Description                                                                                        |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| blockId         | id of the block                                                                                    |
-| captureId       | id of the timestamp                                                                                |
-| visualizationId | id of the layer                                                                                    |
-| visualization   | (Optional) object with method and parameters\* for a visualization. Disables visualizationId prop. |
-| maxZoom         | maxZoomlevel of the layer                                                                          |
-| token           | token of the user (optional)                                                                       |
+| Name        | Description                               |
+| ----------- | ----------------------------------------- |
+| pathId      | id of the path                            |
+| timestampId | id of the timestamp                       |
+| layer       | id of the layer or object\* describing it |
+| maxZoom     | maxZoomlevel of the layer                 |
+| token       | token of the user (optional)              |
 
 *For the possible methods and parameters of *visualization\*, refer to this documentation about it: https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20mapLayers%2Fadd
 
@@ -98,7 +97,7 @@ Each method can have an optional parameter noData. No data must be an array of o
 
 | Name [mutable]     | Description                                                                                  |
 | ------------------ | -------------------------------------------------------------------------------------------- |
-| blockId [M]        | Id of the block                                                                              |
+| pathId [M]         | Id of the path                                                                               |
 | layerId [M]        | Id of the layer                                                                              |
 | onFeatureClick [M] | A function to run on feature click, with as argument the clicked feature                     |
 | maxZoom            | (Optional) maxZoomlevel of the layer. If not specified, use the one specified in layer info. |
@@ -128,7 +127,7 @@ _note_ for the style object, refer to this documentation about it: https://app.e
 ○ 'random': Parameters contains the required property 'property' and optional property 'alpha', where 'property' should be the name of the property by which to randomly assign colors and should be of type string and 'alpha' should be the transparency of the color on a 0 to 1 scale with default 0.5.
 
 </details>
-### Use the EllipsisApi to login into Ellipsis Drive or view metadata of blocks
+### Use the EllipsisApi to login into Ellipsis Drive or view metadata of paths
 
 #### EllipsisApi.login description
 
@@ -147,13 +146,13 @@ token: string; //token to use in other api calls
 expires: number; //expiration time in milliseconds
 ```
 
-#### EllipsisApi.getInfo description
+#### EllipsisApi.getPath description
 
 **parameters**
 
 | name   | description                                                                       |
 | ------ | --------------------------------------------------------------------------------- |
-| pathId | The id of the block, folder or layer.                                             |
+| pathId | The id of the path.                                                               |
 | user   | (Optional) An user object which can contain a token like `user: {token: mytoken}` |
 
 **return value**
