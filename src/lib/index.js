@@ -1,5 +1,5 @@
-import EllipsisApi from './EllipsisApi';
 import EllipsisRasterLayer from './EllipsisRasterLayer';
 import EllipsisVectorLayer from './EllipsisVectorLayer';
+import { EllipsisApi } from 'ellipsis-js-util';
 
-export {EllipsisApi, EllipsisRasterLayer, EllipsisVectorLayer};
+export { EllipsisRasterLayer, EllipsisVectorLayer, EllipsisApi };

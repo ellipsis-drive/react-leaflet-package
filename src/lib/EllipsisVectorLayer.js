@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
-import { getFeatureStyling, extractStyling, styleKeys } from './util/VectorLayerUtil';
-
-import EllipsisApi from './EllipsisApi';
+import { VectorLayerUtil } from 'ellipsis-js-util';
 
 const reactLeaflet = require('react-leaflet');
 let useLeaflet = reactLeaflet.useLeaflet;
@@ -15,23 +13,15 @@ if (!useMapEvents) useMapEvents = () => { return undefined; };
 export const EllipsisVectorLayer = props => {
 
   const [, update] = useState(0);
-
-  const [state] = useState({
-    cache: [],
-    tiles: [],
-    zoom: 1,
-    isLoading: false,
-    nextPageStart: undefined,
-    gettingVectorsInterval: undefined
-  });
+  const base = useRef(new VectorLayerUtil.EllipsisVectorLayerBase({ ...props }));
 
   //Use new map events if available.
-  const _map3x = useMapEvents(!props.loadAll ? {
+  const _map3x = useMapEvents(!base.current.options.loadAll ? {
     move: () => {
-      handleViewportUpdate();
+      base.current.update();
     },
     zoomend: () => {
-      handleViewportUpdate();
+      base.current.update();
     }
   } : {});
 
@@ -39,8 +29,8 @@ export const EllipsisVectorLayer = props => {
   const _map2x = useLeaflet();
   useEffect(() => {
     if (!_map2x) return;
-    _map2x.map.on('move', () => handleViewportUpdate());
-    _map2x.map.on('zoomend', () => handleViewportUpdate());
+    _map2x.map.on('move', () => base.current.update());
+    _map2x.map.on('zoomend', () => base.current.update());
     // eslint-disable-next-line
   }, [_map2x]);
 
@@ -52,323 +42,64 @@ export const EllipsisVectorLayer = props => {
 
   //On mount, start updating the map.
   useEffect(() => {
-    requestLayerInfo().then(() => {
-      readStylingInfo();
-      handleViewportUpdate();
-    });
-    return () => {
-      if (state.gettingVectorsInterval) {
-        clearInterval(state.gettingVectorsInterval);
-        state.gettingVectorsInterval = undefined;
-      }
-    }
-    // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
-    //clear cache and get new data
-    resetState();
-    // eslint-disable-next-line
-  }, [props.filter, props.centerPoints, props.loadAll]);
-
-  useEffect(() => {
-    requestLayerInfo().then(() => resetState());
-    // eslint-disable-next-line
-  }, [props.blockId, props.layerId, props.token]);
-
-  useEffect(() => {
-    getCachedFeatures().forEach(x => compileStyle(x));
-    update(Date.now());
-    // eslint-disable-next-line
-  }, [props.lineWidth, props.radius]);
-
-  useEffect(() => {
-    readStylingInfo();
-    resetState();
-    // eslint-disable-next-line
-  }, [props.styleId, props.style]);
-
-  //Reads relevant styling info from state.layerInfo. Sets this in state.styleInfo.
-  const readStylingInfo = () => {
-
-    const apiStyleObjectKeys = { ...styleKeys };
-    delete apiStyleObjectKeys.radius;
-
-    if (!props.styleId && props.style) {
-      state.styleInfo = props.style ? extractStyling(props.style.parameters, apiStyleObjectKeys) : undefined;
-      // console.log(props.style);
-      return;
-    }
-    if (!state.layerInfo || !state.layerInfo.styles) {
-      state.styleInfo = undefined;
-      return;
-    }
-    //Get width and opacity from layer info style.
-    const apiStylingObject = state.layerInfo.styles.find(s =>
-      s.id === props.styleId || (s.isDefault && !props.styleId));
-    state.styleInfo = apiStylingObject && apiStylingObject.parameters ?
-      extractStyling(apiStylingObject.parameters, apiStyleObjectKeys) : undefined;
-  }
-
-  //Requests layer info for layer with id layerId. Sets this in state.layerInfo.
-  const requestLayerInfo = async () => {
-    try {
-      const info = await EllipsisApi.getInfo(props.blockId, { token: props.token });
-      if (!info.geometryLayers) return;
-      const layerInfo = info.geometryLayers.find(x => x.id === props.layerId);
-      state.maxZoom = layerInfo.zoom;
-      if (layerInfo)
-        state.layerInfo = layerInfo;
-    } catch (e) {
-      console.error('could not retreive layer info');
-    }
-  }
-
-  //Reset all cached info. Will always continue loading after.
-  const resetState = () => {
-    if (state.isLoading) {
-      //reset after load step is done
-      state.resetState = true;
-      return;
-    }
-    state.cache = [];
-    state.tiles = [];
-    state.nextPageStart = undefined;
-    state.resetState = undefined;
-    update(Date.now());
-    handleViewportUpdate();
-  }
-
-  const getCachedFeatures = () => {
-    let features = [];
-    if (props.loadAll) {
-      features = state.cache;
-    } else {
-      features = state.tiles.flatMap((t) => {
-        const geoTile = state.cache[getTileId(t)];
-        return geoTile ? geoTile.elements : [];
-      });
-    }
-    return features;
-  }
-
-  const handleViewportUpdate = () => {
-    const viewport = getMapBounds();
-    if (!viewport) return;
-    state.zoom = Math.max(Math.min(props.maxZoom === undefined ? state.maxZoom : props.maxZoom, viewport.zoom - 2), 0);
-    state.tiles = boundsToTiles(viewport.bounds, state.zoom);
-
-    if (state.gettingVectorsInterval) return;
-    state.gettingVectorsInterval = setInterval(async () => {
-      if (state.isLoading) return;
-
-      const loadedSomething = await loadStep();
-
-      if (state.resetState) {
-        resetState();
-        return;
-      }
-      if (!loadedSomething) {
-        clearInterval(state.gettingVectorsInterval);
-        state.gettingVectorsInterval = undefined;
-        return;
-      }
-      update(Date.now());
-    }, 100);
-  };
-
-  const loadStep = async () => {
-    state.isLoading = true;
-    // console.log('loading');
-    if (props.loadAll) {
-      const cachedSomething = await getAndCacheAllGeoJsons();
-      state.isLoading = false;
-      // console.log('done loading');
-      return cachedSomething;
-    }
-
-    ensureMaxCacheSize();
-    const cachedSomething = await getAndCacheGeoJsons();
-    state.isLoading = false;
-    // console.log('done loading');
-    return cachedSomething;
-  };
-
-  const ensureMaxCacheSize = () => {
-    const keys = Object.keys(state.cache);
-    if (keys.length > props.maxTilesInCache) {
-      const dates = keys.map((k) => state.state.cache[k].date).sort();
-      const clipValue = dates[9];
-      keys.forEach((key) => {
-        if (state.cache[key].date <= clipValue) {
-          delete state.cache[key];
-        }
-      });
-    }
-  };
-
-  const getAndCacheAllGeoJsons = async () => {
-    if (state.nextPageStart === 4)
-      return false;
-
-    const body = {
-      pageStart: state.nextPageStart,
-      mapId: props.blockId,
-      returnType: props.centerPoints ? "center" : "geometry",
-      layerId: props.layerId,
-      zip: true,
-      pageSize: Math.min(3000, props.pageSize),
-      styleId: props.styleId,
-      style: props.style
-    };
-
-    try {
-      const res = await EllipsisApi.post("/geometry/get", body, { token: props.token });
-      state.nextPageStart = res.nextPageStart;
-      if (!res.nextPageStart)
-        state.nextPageStart = 4; //EOT
-      if (res.result && res.result.features) {
-        res.result.features.forEach(x => {
-          compileStyle(x);
-          state.cache.push(x);
-        });
-      }
-    } catch {
-      return false;
-    }
-    return true;
-  };
-
-  const getAndCacheGeoJsons = async () => {
-    const date = Date.now();
-    //create tiles parameter which contains tiles that need to load more features
-    const tilesParam = state.tiles.map((t) => {
-      const tileId = getTileId(t);
-
-      //If not cached, always try to load features.
-      if (!state.cache[tileId])
-        return { tileId: t }
-
-      const pageStart = state.cache[tileId].nextPageStart;
-
-      //TODO in other packages we use < instead of <=
-      //Check if tile is not already fully loaded, and if more features may be loaded
-      if (pageStart && state.cache[tileId].amount <= props.maxFeaturesPerTile && state.cache[tileId].size <= (props.maxMbPerTile * 1000000))
-        return { tileId: t, pageStart }
-
-      return null;
-    }).filter(x => x);
-
-    if (tilesParam.length === 0) return false;
-
-    const body = {
-      mapId: props.blockId,
-      returnType: props.centerPoints ? "center" : "geometry",
-      layerId: props.layerId,
-      zip: true,
-      pageSize: Math.min(3000, props.pageSize),
-      styleId: props.styleId,
-      style: props.style,
-      propertyFilter: (props.filter && props.filter > 0) ? props.filter : null,
-    };
-
-    //Get new geometry for the tiles
-    let result = [];
-    const chunkSize = 10;
-    for (let k = 0; k < tilesParam.length; k += chunkSize) {
-      body.tiles = tilesParam.slice(k, k + chunkSize);
-      try {
-        const res = await EllipsisApi.post("/geometry/tile", body, { token: props.token });
-        result = result.concat(res);
-      } catch {
-        return false;
-      }
-    }
-
-    //Add newly loaded data to cache
-    for (let j = 0; j < tilesParam.length; j++) {
-      const tileId = getTileId(tilesParam[j].tileId);
-
-      if (!state.cache[tileId]) {
-        state.cache[tileId] = {
-          size: 0,
-          amount: 0,
-          elements: [],
-          nextPageStart: null,
-        };
-      }
-
-      //set tile info for tile in this.
-      const tileData = state.cache[tileId];
-      tileData.date = date;
-      tileData.size = tileData.size + result[j].size;
-      tileData.amount = tileData.amount + result[j].result.features.length;
-      tileData.nextPageStart = result[j].nextPageStart;
-      result[j].result.features.forEach(x => compileStyle(x));
-      tileData.elements = tileData.elements.concat(result[j].result.features);
-
-    }
-    return true;
-  };
-
-  const getTileId = (tile) => `${tile.zoom}_${tile.tileX}_${tile.tileY}`;
-
-  const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${props.centerPoints ? 'center' : 'geometry'}_${props.styleId ? props.styleId : 'nostyle'}_${index}`;
-
-  const boundsToTiles = (bounds, zoom) => {
-    const xMin = Math.max(bounds.xMin, -180);
-    const xMax = Math.min(bounds.xMax, 180);
-    const yMin = Math.max(bounds.yMin, -85);
-    const yMax = Math.min(bounds.yMax, 85);
-
-    const zoomComp = Math.pow(2, zoom);
-    const comp1 = zoomComp / 360;
-    const pi = Math.PI;
-    const comp2 = 2 * pi;
-    const comp3 = pi / 4;
-
-    const tileXMin = Math.floor((xMin + 180) * comp1);
-    const tileXMax = Math.floor((xMax + 180) * comp1);
-    const tileYMin = Math.floor(
-      (zoomComp / comp2) *
-      (pi - Math.log(Math.tan(comp3 + (yMax / 360) * pi)))
-    );
-    const tileYMax = Math.floor(
-      (zoomComp / comp2) *
-      (pi - Math.log(Math.tan(comp3 + (yMin / 360) * pi)))
-    );
-
-    let tiles = [];
-    for (
-      let x = Math.max(0, tileXMin - 1);
-      x <= Math.min(2 ** zoom - 1, tileXMax + 1);
-      x++
-    ) {
-      for (
-        let y = Math.max(0, tileYMin - 1);
-        y <= Math.min(2 ** zoom - 1, tileYMax + 1);
-        y++
-      ) {
-        tiles.push({ zoom, tileX: x, tileY: y });
-      }
-    }
-    return tiles;
-  };
-
-  const compileStyle = (feature) => {
-    let compiledStyle = getFeatureStyling(feature, state.styleInfo, props);
-    compiledStyle = extractStyling(compiledStyle, {
+    base.current.loadOptions.styleKeys = {
       radius: [],
       weight: ['width'],
       color: ['borderColor'],
       opacity: ['borderOpacity'],
       fillColor: [],
       fillOpacity: []
-    });
+    };
+    base.current.getMapBounds = getMapBounds;
+    base.current.updateView = () => {
+      update(Date.now());
+    }
 
-    if (!feature.properties) feature.properties = {};
-    feature.properties.compiledStyle = compiledStyle;
-  };
+    base.current.update();
+    return () => {
+      base.current.clearLayer();
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  const pushPropUpdates = (...updated) => {
+    updated.forEach(x => base.current.options[x] = props[x]);
+  }
+
+  useEffect(() => {
+    pushPropUpdates('filter', 'centerPoints', 'loadAll');
+    //clear cache and get new data
+    base.current.clearLayer().then(async () => await base.current.update());
+    // eslint-disable-next-line
+  }, [props.filter, props.centerPoints, props.loadAll]);
+
+  useEffect(() => {
+    pushPropUpdates('blockId', 'pathId', 'layerId', 'token');
+    base.current.fetchLayerInfo().then(async () => {
+      base.current.fetchStylingInfo();
+      await base.current.clearLayer();
+      await base.current.update();
+    });
+    // eslint-disable-next-line
+  }, [props.pathId, props.blockId, props.layerId, props.token]);
+
+  useEffect(() => {
+    pushPropUpdates('lineWidth', 'radius');
+    base.current.recompileStyles();
+    update(Date.now());
+    // eslint-disable-next-line
+  }, [props.lineWidth, props.radius]);
+
+  useEffect(() => {
+    pushPropUpdates('styleId', 'style');
+    base.current.fetchStylingInfo();
+
+    //TODO check if style updates can happen without clearing the layer.
+    base.current.clearLayer().then(async () => await base.current.update());
+    // eslint-disable-next-line
+  }, [props.style, props.styleId]);
+
+  const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${base.current.options.centerPoints ? 'center' : 'geometry'}_${base.current.options.styleId ? base.current.options.styleId : 'nostyleid'}_${base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle'}_${index}`;
 
   const getMapBounds = () => {
     const map = getMapRef();
@@ -387,8 +118,9 @@ export const EllipsisVectorLayer = props => {
   };
 
   const render = () => {
-    if (!state.tiles || state.tiles.length === 0) return <></>;
-    const features = getCachedFeatures();
+    const features = base.current.getFeatures();
+    if (!features.length) return <></>;
+
     return <>{features.flatMap(feature => {
       const type = feature.geometry.type;
       //Check for (Multi)Polygons and (Multi)LineStrings
@@ -423,22 +155,14 @@ export const EllipsisVectorLayer = props => {
             {...feature.properties.compiledStyle}
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
+            pane={'markerPane'}
           />
         )
       }
       return [];
     })}</>
   }
-
   return render();
-}
-
-EllipsisVectorLayer.defaultProps = {
-  pageSize: 25,
-  maxFeaturesPerTile: 200,
-  maxMbPerTile: 16,
-  maxTilesInCache: 500,
-  loadAll: false,
 }
 
 export default EllipsisVectorLayer;
