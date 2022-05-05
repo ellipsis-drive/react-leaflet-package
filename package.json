@@ -10,7 +10,7 @@
     "Ellipsis Drive",
     "react leaflet"
   ],
-  "version": "1.6.5",
+  "version": "1.7.0",
   "private": false,
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "core-js": "^3.18.3",
-    "ellipsis-js-util": "^1.0.1"
+    "ellipsis-js-util": "^1.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.15.7",

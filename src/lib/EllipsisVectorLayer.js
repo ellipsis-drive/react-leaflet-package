@@ -74,14 +74,14 @@ export const EllipsisVectorLayer = props => {
   }, [props.filter, props.centerPoints, props.loadAll]);
 
   useEffect(() => {
-    pushPropUpdates('blockId', 'layerId', 'token');
+    pushPropUpdates('blockId', 'pathId', 'layerId', 'token');
     base.current.fetchLayerInfo().then(async () => {
       base.current.fetchStylingInfo();
       await base.current.clearLayer();
       await base.current.update();
     });
     // eslint-disable-next-line
-  }, [props.blockId, props.layerId, props.token]);
+  }, [props.pathId, props.blockId, props.layerId, props.token]);
 
   useEffect(() => {
     pushPropUpdates('lineWidth', 'radius');
