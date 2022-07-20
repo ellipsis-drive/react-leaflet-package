@@ -52,7 +52,7 @@ useEffect(() => {
 | maxZoom     | maxZoomlevel of the layer                 |
 | token       | token of the user (optional)              |
 
-*For the possible methods and parameters of *visualization\*, refer to this documentation about it: https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20mapLayers%2Fadd
+*For the possible methods and parameters of *visualization\*, refer to this documentation about it: https://docs.ellipsis-drive.com/developers/api-v2/raster/raster-layers/add-raster-layer
 
 <details>
 <summary>Or this copied info</summary>
@@ -115,7 +115,7 @@ Each method can have an optional parameter noData. No data must be an array of o
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
-_note_ for the style object, refer to this documentation about it: https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20geometryLayers%2FaddStyle.
+_note_ for the style object, refer to this documentation about it: https://docs.ellipsis-drive.com/developers/api-v2/vector/vector-layers/vector-styling/add-style.
 
 <details>
 <summary>Or this copied info</summary>
