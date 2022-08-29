@@ -41,23 +41,23 @@ function Test() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <EllipsisVectorLayer
-          blockId='b8468235-31b5-4959-91a4-0e52a1d4feb6'
+          pathId='b8468235-31b5-4959-91a4-0e52a1d4feb6'
           layerId='44be2542-d20d-457b-b003-698d048d2c6c'
           onFeatureClick={(feature, layer) => console.log(feature)}
           style={{ "method": "fromColorProperty", "pasting": false, "parameters": { "alpha": 0.5, "width": 2, "radius": { "method": "constant", "parameters": { "value": 100 } }, "defaultColor": "#C75B1C" } }}
           pageSize={50}
           radius={19}
         />
-        {/*
+
         <EllipsisVectorLayer
-          blockId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
+          pathId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
           // style={style}
           // debug={true}
           fetchInterval={50}
           pageSize={25}
           onFeatureClick={(feature, layer) => console.log(feature)}
-        /> */}
+        />
         {/* <EllipsisRasterLayer
           blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
           visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'

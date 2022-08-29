@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-import { GeoJSON, CircleMarker, Marker } from 'react-leaflet';
+import { GeoJSON, CircleMarker, Marker, Tooltip } from 'react-leaflet';
 import { VectorLayerUtil } from 'ellipsis-js-util';
 
 const reactLeaflet = require('react-leaflet');
@@ -134,7 +134,12 @@ export const EllipsisVectorLayer = props => {
             onEachFeature={!props.onFeatureClick ? undefined : (feature, layer) =>
               layer.on('click', () => props.onFeatureClick(feature, layer))
             }
-          />,
+          >
+            {feature.properties.compiledStyle.popupProperty ?
+              <Tooltip direction="right" offset={[0, 0]} opacity={1} permanent>
+                {feature.properties.compiledStyle.popupProperty}
+              </Tooltip> : undefined}
+          </GeoJSON>,
         ];
       }
       if (type.endsWith('Point')) {
