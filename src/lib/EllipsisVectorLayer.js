@@ -10,6 +10,16 @@ let useMapEvents = reactLeaflet.useMapEvents;
 if (!useLeaflet) useLeaflet = () => { return undefined; };
 if (!useMapEvents) useMapEvents = () => { return undefined; };
 
+const EllipsisPopupProperty = ({ feature }) => {
+  // console.log(feature.properties.compiledStyle)
+  // console.log(feature.properties)
+  return <>{feature.properties.compiledStyle.popupProperty ?
+    <Tooltip direction="right" offset={[0, 0]} opacity={1} permanent>
+      {feature.properties[feature.properties.compiledStyle.popupProperty]}
+    </Tooltip> : undefined}
+  </>
+}
+
 export const EllipsisVectorLayer = props => {
 
   const [, update] = useState(0);
@@ -48,7 +58,8 @@ export const EllipsisVectorLayer = props => {
       color: ['borderColor'],
       opacity: ['borderOpacity'],
       fillColor: [],
-      fillOpacity: []
+      fillOpacity: [],
+      popupProperty: [],
     };
     base.current.getMapBounds = getMapBounds;
     base.current.updateView = () => {
@@ -135,10 +146,7 @@ export const EllipsisVectorLayer = props => {
               layer.on('click', () => props.onFeatureClick(feature, layer))
             }
           >
-            {feature.properties.compiledStyle.popupProperty ?
-              <Tooltip direction="right" offset={[0, 0]} opacity={1} permanent>
-                {feature.properties.compiledStyle.popupProperty}
-              </Tooltip> : undefined}
+            <EllipsisPopupProperty feature={feature} />
           </GeoJSON>,
         ];
       }
@@ -153,7 +161,7 @@ export const EllipsisVectorLayer = props => {
             position={[coordinate[1], coordinate[0]]}
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
-          /> :
+          ><EllipsisPopupProperty feature={feature} /></Marker> :
           <CircleMarker
             key={getFeatureId(feature, i)}
             center={[coordinate[1], coordinate[0]]}
@@ -161,7 +169,7 @@ export const EllipsisVectorLayer = props => {
             interactive={props.onFeatureClick ? true : false}
             onClick={!props.onFeatureClick ? undefined : (e) => props.onFeatureClick(feature, e)}
             pane={'markerPane'}
-          />
+          ><EllipsisPopupProperty feature={feature} /></CircleMarker>
         )
       }
       return [];
