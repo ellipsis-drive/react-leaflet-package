@@ -110,7 +110,7 @@ export const EllipsisVectorLayer = props => {
     // eslint-disable-next-line
   }, [props.style, props.styleId]);
 
-  const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${base.current.options.centerPoints ? 'center' : 'geometry'}_${base.current.options.styleId ? base.current.options.styleId : 'nostyleid'}_${base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle'}_${index}`;
+  const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${base.current.levelOfDetail}_${base.current.getReturnType()}_${base.current.options.styleId ? base.current.options.styleId : 'nostyleid'}_${base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle'}_${index}`;
 
   const getMapBounds = () => {
     const map = getMapRef();
