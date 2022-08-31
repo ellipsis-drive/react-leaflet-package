@@ -51,6 +51,7 @@ useEffect(() => {
 | layer       | id of the layer or object\* describing it |
 | maxZoom     | maxZoomlevel of the layer                 |
 | token       | token of the user (optional)              |
+| mask        | Mask of type multipolygon (optional)      |
 
 *For the possible methods and parameters of *visualization\*, refer to this documentation about it: https://docs.ellipsis-drive.com/developers/api-v2/raster/raster-layers/add-raster-layer
 
