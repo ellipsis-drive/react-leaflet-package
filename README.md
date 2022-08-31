@@ -105,6 +105,9 @@ Each method can have an optional parameter noData. No data must be an array of o
 | styleId [M]        | (Optional) Id of the layer style. Uses default style if not set.                             |
 | style [M]          | (Optional) Object with style properties. Only used if styleId is not set.                    |
 | filter [M]         | (Optional) A property filter to use                                                          |
+| levelOfDetail      | The level of detail ranging from 1 to 5, or 6 to disable this feature. Default 6.  	        |
+| levelOfDetailMode  | A string of value 'dynamic' (=default) to change the level of detail with zoom, or 'static'. |
+| levelOfDetailMapper| (Optional) A function that transforms `zoom` to a `levelOfDetail`, used in dynamic mode.     |
 | centerPoints [M]   | Boolean whether to render only center points. Default false.                                 |
 | pageSize [M]       | Size to retreive per step. Default 25, max 3000.                                             |
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                                               |
@@ -112,6 +115,7 @@ Each method can have an optional parameter noData. No data must be an array of o
 | maxFeaturesPerTile | The maximum number of vectors to load per tile. Default 200.                                 |
 | loadAll [M]        | Always load all vectors, even if not visible or far away. Default false                      |
 | fetchInterval      | The interval in ms between finishing a request and starting a new request. Default 0.        |
+
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
