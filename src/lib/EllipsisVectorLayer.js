@@ -26,14 +26,14 @@ export const EllipsisVectorLayer = props => {
   const base = useRef(new VectorLayerUtil.EllipsisVectorLayerBase({ ...props }));
 
   //Use new map events if available.
-  const _map3x = useMapEvents(!base.current.options.loadAll ? {
+  const _map3x = useMapEvents({
     move: () => {
       base.current.update();
     },
     zoomend: () => {
       base.current.update();
     }
-  } : {});
+  });
 
   //Use legacy hooks if needed.
   const _map2x = useLeaflet();
