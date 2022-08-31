@@ -52,18 +52,32 @@ if (!useMapEvents) useMapEvents = () => {
   return undefined;
 };
 
+const EllipsisPopupProperty = _ref => {
+  let {
+    feature
+  } = _ref;
+  // console.log(feature.properties.compiledStyle)
+  // console.log(feature.properties)
+  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, feature.properties.compiledStyle.popupProperty ? /*#__PURE__*/_react.default.createElement(_reactLeaflet.Tooltip, {
+    direction: "right",
+    offset: [0, 0],
+    opacity: 1,
+    permanent: true
+  }, feature.properties[feature.properties.compiledStyle.popupProperty]) : undefined);
+};
+
 const EllipsisVectorLayer = props => {
   const [, update] = (0, _react.useState)(0);
   const base = (0, _react.useRef)(new _ellipsisJsUtil.VectorLayerUtil.EllipsisVectorLayerBase(_objectSpread({}, props))); //Use new map events if available.
 
-  const _map3x = useMapEvents(!base.current.options.loadAll ? {
+  const _map3x = useMapEvents({
     move: () => {
       base.current.update();
     },
     zoomend: () => {
       base.current.update();
     }
-  } : {}); //Use legacy hooks if needed.
+  }); //Use legacy hooks if needed.
 
 
   const _map2x = useLeaflet();
@@ -90,7 +104,8 @@ const EllipsisVectorLayer = props => {
       color: ['borderColor'],
       opacity: ['borderOpacity'],
       fillColor: [],
-      fillOpacity: []
+      fillOpacity: [],
+      popupProperty: []
     };
     base.current.getMapBounds = getMapBounds;
 
@@ -139,7 +154,7 @@ const EllipsisVectorLayer = props => {
 
   const getFeatureId = function getFeatureId(feature) {
     let index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    return "".concat(feature.properties.id, "_").concat(base.current.options.centerPoints ? 'center' : 'geometry', "_").concat(base.current.options.styleId ? base.current.options.styleId : 'nostyleid', "_").concat(base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle', "_").concat(index);
+    return "".concat(feature.properties.id, "_").concat(base.current.levelOfDetail, "_").concat(base.current.getReturnType(), "_").concat(base.current.options.styleId ? base.current.options.styleId : 'nostyleid', "_").concat(base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle', "_").concat(index);
   };
 
   const getMapBounds = () => {
@@ -173,7 +188,9 @@ const EllipsisVectorLayer = props => {
           style: feature.properties.compiledStyle,
           interactive: props.onFeatureClick ? true : false,
           onEachFeature: !props.onFeatureClick ? undefined : (feature, layer) => layer.on('click', () => props.onFeatureClick(feature, layer))
-        })];
+        }, /*#__PURE__*/_react.default.createElement(EllipsisPopupProperty, {
+          feature: feature
+        }))];
       }
 
       if (type.endsWith('Point')) {
@@ -185,13 +202,17 @@ const EllipsisVectorLayer = props => {
           position: [coordinate[1], coordinate[0]],
           interactive: props.onFeatureClick ? true : false,
           onClick: !props.onFeatureClick ? undefined : e => props.onFeatureClick(feature, e)
-        }) : /*#__PURE__*/_react.default.createElement(_reactLeaflet.CircleMarker, _extends({
+        }, /*#__PURE__*/_react.default.createElement(EllipsisPopupProperty, {
+          feature: feature
+        })) : /*#__PURE__*/_react.default.createElement(_reactLeaflet.CircleMarker, _extends({
           key: getFeatureId(feature, i),
           center: [coordinate[1], coordinate[0]]
         }, feature.properties.compiledStyle, {
           interactive: props.onFeatureClick ? true : false,
           onClick: !props.onFeatureClick ? undefined : e => props.onFeatureClick(feature, e),
           pane: 'markerPane'
+        }), /*#__PURE__*/_react.default.createElement(EllipsisPopupProperty, {
+          feature: feature
         })));
       }
 
