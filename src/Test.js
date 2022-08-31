@@ -49,7 +49,8 @@ function Test() {
           radius={19}
         /> */}
 
-        <EllipsisVectorLayer
+        {/* BORDERS */}
+        {/* <EllipsisVectorLayer
           pathId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
           style={{ "method": "fromColorProperty", parameters: { "popupProperty": "NAME", "defaultColor": "#C75B1C" } }}
@@ -57,12 +58,23 @@ function Test() {
           fetchInterval={50}
           pageSize={25}
           onFeatureClick={(feature, layer) => console.log(feature)}
-        />
+        /> */}
+
+        {/* POINTS TEST */}
         {/* <EllipsisRasterLayer
           blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
           visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'
           captureId={0}
         /> */}
+
+        {/* MEXICO */}
+        <EllipsisVectorLayer
+          pathId='d917503b-f125-4be8-9ab1-fc0cae845064'
+          layerId='25eaa99d-1b3b-4e62-a482-e13fefab2a2e'
+          styleId='def3f179-23ff-452a-9f83-67a981706281'
+          onFeatureClick={(feature, layer) => console.log(feature)}
+          maxTilesInCache={3}
+        />
       </MapContainer>
     </>
   );
