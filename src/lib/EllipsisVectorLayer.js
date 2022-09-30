@@ -24,6 +24,9 @@ export const EllipsisVectorLayer = props => {
 
   const [, update] = useState(0);
   const base = useRef(new VectorLayerUtil.EllipsisVectorLayerBase({ ...props }));
+  const queuedUpdates = useRef({});
+  const isUpdating = useRef(false);
+  const isMounted = useRef(false);
 
   //Use new map events if available.
   const _map3x = useMapEvents({
@@ -77,38 +80,105 @@ export const EllipsisVectorLayer = props => {
     updated.forEach(x => base.current.options[x] = props[x]);
   }
 
+  const playbackQueue = async () => {
+    for (const [key, playbackFunction] of Object.entries(queuedUpdates.current)) {
+      if (!playbackFunction) continue;
+      queuedUpdates.current[key] = undefined;
+      console.log("call function from queue");
+      await playbackFunction();
+    }
+  }
+
   useEffect(() => {
-    pushPropUpdates('filter', 'centerPoints', 'loadAll');
-    //clear cache and get new data
-    base.current.clearLayer().then(async () => await base.current.update());
+    if (!isMounted.current) return;
+    console.log("load update");
+    const loadTypeUpdater = async () => {
+      isUpdating.current = true;
+      pushPropUpdates('filter', 'centerPoints', 'loadAll');
+      if (!queuedUpdates.current["loadTypeUpdate"])
+        await base.current.clearLayer();
+      if (!queuedUpdates.current["loadTypeUpdate"])
+        await base.current.update()
+      isUpdating.current = false;
+    }
+    if (isUpdating.current) {
+      base.current.awaitNotLoading();
+      queuedUpdates.current["loadTypeUpdate"] = loadTypeUpdater;
+      return;
+    }
+    loadTypeUpdater();
     // eslint-disable-next-line
   }, [props.filter, props.centerPoints, props.loadAll]);
 
   useEffect(() => {
-    pushPropUpdates('blockId', 'pathId', 'layerId', 'token');
-    base.current.fetchLayerInfo().then(async () => {
+    if (!isMounted.current) return;
+    console.log("id update");
+    const idUpdater = async () => {
+      isUpdating.current = true;
+      pushPropUpdates('blockId', 'pathId', 'layerId', 'token');
+      await base.current.fetchLayerInfo();
       base.current.fetchStylingInfo();
-      await base.current.clearLayer();
-      await base.current.update();
-    });
+      if (!queuedUpdates.current["idUpdate"])
+        await base.current.clearLayer();
+      if (!queuedUpdates.current["idUpdate"])
+        await base.current.update();
+      isUpdating.current = false;
+      playbackQueue();
+    }
+    if (isUpdating.current) {
+      base.current.awaitNotLoading();
+      queuedUpdates.current["idUpdate"] = idUpdater;
+      return;
+    }
+    idUpdater();
     // eslint-disable-next-line
   }, [props.pathId, props.blockId, props.layerId, props.token]);
 
   useEffect(() => {
-    pushPropUpdates('lineWidth', 'radius');
-    base.current.recompileStyles();
-    update(Date.now());
+    if (!isMounted.current) return;
+    const widthUpdater = () => {
+      pushPropUpdates('lineWidth', 'radius');
+      base.current.recompileStyles();
+      update(Date.now());
+    }
+    widthUpdater();
     // eslint-disable-next-line
   }, [props.lineWidth, props.radius]);
 
   useEffect(() => {
-    pushPropUpdates('styleId', 'style');
-    base.current.fetchStylingInfo();
+    if (!isMounted.current) return;
+    console.log("style update");
+    const styleUpdater = async () => {
+      isUpdating.current = true;
+      pushPropUpdates('styleId', 'style');
+      console.log("updating style")
+      await base.current.fetchLayerInfo();
+      base.current.fetchStylingInfo();
 
-    //TODO check if style updates can happen without clearing the layer.
-    base.current.clearLayer().then(async () => await base.current.update());
+      if (!queuedUpdates.current["styleUpdate"])
+        await base.current.clearLayer();
+      if (!queuedUpdates.current["styleUpdate"])
+        await base.current.update();
+
+      isUpdating.current = false;
+      playbackQueue();
+    };
+
+    if (isUpdating.current) {
+      base.current.awaitNotLoading();
+      queuedUpdates.current["styleUpdate"] = styleUpdater;
+      console.log("add function to queue");
+      return;
+    }
+    console.log("call style updater");
+    styleUpdater();
+
     // eslint-disable-next-line
   }, [props.style, props.styleId]);
+
+  useEffect(() => {
+    isMounted.current = true;
+  }, []);
 
   const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${base.current.levelOfDetail}_${base.current.getReturnType()}_${base.current.options.styleId ? base.current.options.styleId : 'nostyleid'}_${base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle'}_${index}`;
 
@@ -129,6 +199,8 @@ export const EllipsisVectorLayer = props => {
   };
 
   const render = () => {
+    if (!base.current) return;
+
     const features = base.current.getFeatures();
     if (!features.length) return <></>;
 

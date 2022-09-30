@@ -13,7 +13,7 @@ const position = [51.505, -0.09]
 function Test() {
 
   const [width, setWidth] = useState(3);
-  const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { opacity: 0, defaultColor: '#ffffff', borderColor: '#000000' } });
+  const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: '#000000' } });
 
   // useEffect(() => {
   //   const i = setInterval(() => {
@@ -23,13 +23,14 @@ function Test() {
   //   return () => clearInterval(i);
   // })
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
-  //     setStyle({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: newStyle } });
-  //     console.log(`set border color to ${newStyle}`);
-  //   }, 10000);
-  // }, [style]);
+  useEffect(() => {
+    console.log('useeffect');
+    setTimeout(() => {
+      const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
+      setStyle({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: newStyle } });
+      console.log(`set border color to ${newStyle}`);
+    }, 20000);
+  }, [style]);
 
   return (
     <>
@@ -50,15 +51,16 @@ function Test() {
         /> */}
 
         {/* BORDERS */}
-        {/* <EllipsisVectorLayer
+        <EllipsisVectorLayer
           pathId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
           layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
-          style={{ "method": "fromColorProperty", parameters: { "popupProperty": "NAME", "defaultColor": "#C75B1C" } }}
+          // style={{ "method": "fromColorProperty", parameters: { "popupProperty": "NAME", "defaultColor": "#C75B1C" } }}
+          style={style}
           // debug={true}
           fetchInterval={50}
           pageSize={25}
           onFeatureClick={(feature, layer) => console.log(feature)}
-        /> */}
+        />
 
         {/* POINTS TEST */}
         {/* <EllipsisRasterLayer
@@ -68,13 +70,13 @@ function Test() {
         /> */}
 
         {/* MEXICO */}
-        <EllipsisVectorLayer
+        {/* <EllipsisVectorLayer
           pathId='d917503b-f125-4be8-9ab1-fc0cae845064'
           layerId='25eaa99d-1b3b-4e62-a482-e13fefab2a2e'
           styleId='def3f179-23ff-452a-9f83-67a981706281'
           onFeatureClick={(feature, layer) => console.log(feature)}
           maxTilesInCache={3}
-        />
+        /> */}
       </MapContainer>
     </>
   );
