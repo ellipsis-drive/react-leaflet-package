@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 
 import { GeoJSON, CircleMarker, Marker, Tooltip } from 'react-leaflet';
 import { VectorLayerUtil } from 'ellipsis-js-util';
@@ -20,10 +20,11 @@ const EllipsisPopupProperty = ({ feature }) => {
   </>
 }
 
+//TODO handle specific props seperately by first destructuring them.
 export const EllipsisVectorLayer = props => {
 
   const [, update] = useState(0);
-  const base = useRef(new VectorLayerUtil.EllipsisVectorLayerBase({ ...props }));
+  const base = useMemo(() => new VectorLayerUtil.EllipsisVectorLayerBase({ ...props }), [props]);
   const queuedUpdates = useRef({});
   const isUpdating = useRef(false);
   const isMounted = useRef(false);
@@ -31,10 +32,10 @@ export const EllipsisVectorLayer = props => {
   //Use new map events if available.
   const _map3x = useMapEvents({
     move: () => {
-      base.current.update();
+      base.update();
     },
     zoomend: () => {
-      base.current.update();
+      base.update();
     }
   });
 
@@ -42,8 +43,8 @@ export const EllipsisVectorLayer = props => {
   const _map2x = useLeaflet();
   useEffect(() => {
     if (!_map2x) return;
-    _map2x.map.on('move', () => base.current.update());
-    _map2x.map.on('zoomend', () => base.current.update());
+    _map2x.map.on('move', () => base.update());
+    _map2x.map.on('zoomend', () => base.update());
     // eslint-disable-next-line
   }, [_map2x]);
 
@@ -55,7 +56,8 @@ export const EllipsisVectorLayer = props => {
 
   //On mount, start updating the map.
   useEffect(() => {
-    base.current.loadOptions.styleKeys = {
+    if (!base) return;
+    base.loadOptions.styleKeys = {
       radius: [],
       weight: ['width'],
       color: ['borderColor'],
@@ -64,45 +66,44 @@ export const EllipsisVectorLayer = props => {
       fillOpacity: [],
       popupProperty: [],
     };
-    base.current.getMapBounds = getMapBounds;
-    base.current.updateView = () => {
+    base.getMapBounds = getMapBounds;
+    base.updateView = () => {
       update(Date.now());
     }
 
-    base.current.update();
+    base.update();
+
     return () => {
-      base.current.clearLayer();
+      base?.clearLayer();
     }
     // eslint-disable-next-line
-  }, []);
+  }, [base]);
 
   const pushPropUpdates = (...updated) => {
-    updated.forEach(x => base.current.options[x] = props[x]);
+    updated.forEach(x => base.options[x] = props[x]);
   }
 
   const playbackQueue = async () => {
     for (const [key, playbackFunction] of Object.entries(queuedUpdates.current)) {
       if (!playbackFunction) continue;
       queuedUpdates.current[key] = undefined;
-      console.log("call function from queue");
       await playbackFunction();
     }
   }
 
   useEffect(() => {
     if (!isMounted.current) return;
-    console.log("load update");
     const loadTypeUpdater = async () => {
       isUpdating.current = true;
       pushPropUpdates('filter', 'centerPoints', 'loadAll');
       if (!queuedUpdates.current["loadTypeUpdate"])
-        await base.current.clearLayer();
+        await base.clearLayer();
       if (!queuedUpdates.current["loadTypeUpdate"])
-        await base.current.update()
+        await base.update()
       isUpdating.current = false;
     }
     if (isUpdating.current) {
-      base.current.awaitNotLoading();
+      base.awaitNotLoading();
       queuedUpdates.current["loadTypeUpdate"] = loadTypeUpdater;
       return;
     }
@@ -112,21 +113,20 @@ export const EllipsisVectorLayer = props => {
 
   useEffect(() => {
     if (!isMounted.current) return;
-    console.log("id update");
     const idUpdater = async () => {
       isUpdating.current = true;
       pushPropUpdates('blockId', 'pathId', 'layerId', 'token');
-      await base.current.fetchLayerInfo();
-      base.current.fetchStylingInfo();
+      await base.fetchLayerInfo();
+      base.fetchStylingInfo();
       if (!queuedUpdates.current["idUpdate"])
-        await base.current.clearLayer();
+        await base.clearLayer();
       if (!queuedUpdates.current["idUpdate"])
-        await base.current.update();
+        await base.update();
       isUpdating.current = false;
       playbackQueue();
     }
     if (isUpdating.current) {
-      base.current.awaitNotLoading();
+      base.awaitNotLoading();
       queuedUpdates.current["idUpdate"] = idUpdater;
       return;
     }
@@ -138,7 +138,7 @@ export const EllipsisVectorLayer = props => {
     if (!isMounted.current) return;
     const widthUpdater = () => {
       pushPropUpdates('lineWidth', 'radius');
-      base.current.recompileStyles();
+      base.recompileStyles();
       update(Date.now());
     }
     widthUpdater();
@@ -147,25 +147,24 @@ export const EllipsisVectorLayer = props => {
 
   useEffect(() => {
     if (!isMounted.current) return;
-    console.log("style update");
     const styleUpdater = async () => {
       isUpdating.current = true;
       pushPropUpdates('styleId', 'style');
       console.log("updating style")
-      await base.current.fetchLayerInfo();
-      base.current.fetchStylingInfo();
+      await base.fetchLayerInfo();
+      base.fetchStylingInfo();
 
       if (!queuedUpdates.current["styleUpdate"])
-        await base.current.clearLayer();
+        await base.clearLayer();
       if (!queuedUpdates.current["styleUpdate"])
-        await base.current.update();
+        await base.update();
 
       isUpdating.current = false;
       playbackQueue();
     };
 
     if (isUpdating.current) {
-      base.current.awaitNotLoading();
+      base.awaitNotLoading();
       queuedUpdates.current["styleUpdate"] = styleUpdater;
       console.log("add function to queue");
       return;
@@ -180,7 +179,7 @@ export const EllipsisVectorLayer = props => {
     isMounted.current = true;
   }, []);
 
-  const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${base.current.levelOfDetail}_${base.current.getReturnType()}_${base.current.options.styleId ? base.current.options.styleId : 'nostyleid'}_${base.current.options.style ? JSON.stringify(base.current.options.style) : 'nostyle'}_${index}`;
+  const getFeatureId = (feature, index = 0) => `${feature.properties.id}_${base.levelOfDetail}_${base.getReturnType()}_${base.options.styleId ? base.options.styleId : 'nostyleid'}_${base.options.style ? JSON.stringify(base.options.style) : 'nostyle'}_${index}`;
 
   const getMapBounds = () => {
     const map = getMapRef();
@@ -199,9 +198,9 @@ export const EllipsisVectorLayer = props => {
   };
 
   const render = () => {
-    if (!base.current) return;
+    if (!base) return;
 
-    const features = base.current.getFeatures();
+    const features = base.getFeatures();
     if (!features.length) return <></>;
 
     return <>{features.flatMap(feature => {

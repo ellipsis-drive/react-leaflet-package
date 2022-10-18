@@ -25,11 +25,17 @@ function Test() {
 
   useEffect(() => {
     console.log('useeffect');
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       const newStyle = style.parameters.borderColor === '#000000' ? '#ffffff' : '#000000';
       setStyle({ method: 'fromColorProperty', parameters: { opacity: 0.5, defaultColor: '#ffffff', borderColor: newStyle } });
       console.log(`set border color to ${newStyle}`);
     }, 20000);
+
+    return () => clearTimeout(timeout);
+  }, [style]);
+
+  useEffect(() => {
+    console.log("style rerender");
   }, [style]);
 
   return (
