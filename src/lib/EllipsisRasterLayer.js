@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { TileLayer } from 'react-leaflet';
-import { RasterLayerUtil } from 'ellipsis-js-util';
-
+import React, { useState, useEffect, useRef } from "react";
+import { TileLayer } from "react-leaflet";
+import { RasterLayerUtil } from "ellipsis-js-util";
 
 const EllipsisRasterLayer = (props) => {
   const [url, setUrl] = useState(RasterLayerUtil.getSlippyMapUrl(props));
@@ -10,7 +9,7 @@ const EllipsisRasterLayer = (props) => {
   useEffect(() => {
     if (!mounted) return;
     setUrl(RasterLayerUtil.getSlippyMapUrl(props));
-  }, [props.token, props.blockId, props.captureId, props.visualizationId, props.visualization]);
+  }, [props]);
 
   useEffect(() => {
     mounted.current = true;
@@ -24,8 +23,8 @@ const EllipsisRasterLayer = (props) => {
       noWrap={true}
       reuseTiles={true}
       maxNativeZoom={props.maxZoom}
-      format={'image/png'}
+      format={"image/png"}
     />
   );
-}
+};
 export default EllipsisRasterLayer;

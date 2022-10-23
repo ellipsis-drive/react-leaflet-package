@@ -1,19 +1,23 @@
-import EllipsisRasterLayer from './lib/EllipsisRasterLayer';
-import EllipsisVectorLayer from './lib/EllipsisVectorLayer';
-import './Test.css';
-import 'leaflet/dist/leaflet.css';
+import EllipsisRasterLayer from "./lib/EllipsisRasterLayer";
+import EllipsisVectorLayer from "./lib/EllipsisVectorLayer";
+import "./Test.css";
+import "leaflet/dist/leaflet.css";
 
-import { MapContainer, TileLayer } from 'react-leaflet'
-import React, { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer } from "react-leaflet";
+import React, { useEffect, useState } from "react";
 
-
-const position = [51.505, -0.09]
-
+const position = [51.505, -0.09];
 
 function Test() {
+  const [loadAll, setLoadAll] = useState(false);
 
-  const [width, setWidth] = useState(3);
-  const [style, setStyle] = useState({ method: 'fromColorProperty', parameters: { opacity: 0, defaultColor: '#ffffff', borderColor: '#000000' } });
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoadAll(!loadAll);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [loadAll]);
 
   // useEffect(() => {
   //   const i = setInterval(() => {
@@ -33,8 +37,15 @@ function Test() {
 
   return (
     <>
-      <h1 style={{ textAlign: 'center', margin: '20px' }}>Below is a test of the map.</h1>
-      <MapContainer style={{ height: '70vh', width: '80vw', margin: '0 auto' }} center={position} zoom={13} scrollWheelZoom={true}>
+      <h1 style={{ textAlign: "center", margin: "20px" }}>
+        Below is a test of the map.
+      </h1>
+      <MapContainer
+        style={{ height: "70vh", width: "80vw", margin: "0 auto" }}
+        center={position}
+        zoom={13}
+        scrollWheelZoom={true}
+      >
         <TileLayer
           noWrap={true}
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -50,15 +61,19 @@ function Test() {
         /> */}
 
         {/* BORDERS */}
-        {/* <EllipsisVectorLayer
-          pathId='1a24a1ee-7f39-4d21-b149-88df5a3b633a'
-          layerId='45c47c8a-035e-429a-9ace-2dff1956e8d9'
-          style={{ "method": "fromColorProperty", parameters: { "popupProperty": "NAME", "defaultColor": "#C75B1C" } }}
-          // debug={true}
+        <EllipsisVectorLayer
+          pathId="1a24a1ee-7f39-4d21-b149-88df5a3b633a"
+          // layerId="45c47c8a-035e-429a-9ace-2dff1956e8d9"
+          // style={{
+          //   method: "fromColorProperty",
+          //   parameters: { popupProperty: "NAME", defaultColor: "#C75B1C" },
+          // }}
+          loadAll={loadAll}
+          debug={true}
           fetchInterval={50}
           pageSize={25}
           onFeatureClick={(feature, layer) => console.log(feature)}
-        /> */}
+        />
 
         {/* POINTS TEST */}
         {/* <EllipsisRasterLayer
@@ -68,34 +83,20 @@ function Test() {
         /> */}
 
         {/* MEXICO */}
-        <EllipsisVectorLayer
-          pathId='d917503b-f125-4be8-9ab1-fc0cae845064'
-          layerId='25eaa99d-1b3b-4e62-a482-e13fefab2a2e'
-          styleId='def3f179-23ff-452a-9f83-67a981706281'
+        {/* <EllipsisVectorLayer
+          pathId="d917503b-f125-4be8-9ab1-fc0cae845064"
+          layerId="25eaa99d-1b3b-4e62-a482-e13fefab2a2e"
+          style="def3f179-23ff-452a-9f83-67a981706281"
           onFeatureClick={(feature, layer) => console.log(feature)}
           maxTilesInCache={3}
-        />
+          debug={true}
+        /> */}
       </MapContainer>
     </>
   );
 }
 
-
-
 export default Test;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
  <div>
