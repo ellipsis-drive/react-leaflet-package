@@ -1,19 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { TileLayer } from "react-leaflet";
 import { RasterLayerUtil } from "ellipsis-js-util";
 
 const EllipsisRasterLayer = (props) => {
-  const [url, setUrl] = useState(RasterLayerUtil.getSlippyMapUrl(props));
-  const mounted = useRef(false);
+  const [url, setUrl] = useState();
 
   useEffect(() => {
-    if (!mounted) return;
-    setUrl(RasterLayerUtil.getSlippyMapUrl(props));
+    if (!props) return;
+    let destructorCalled = false;
+
+    RasterLayerUtil.getSlippyMapUrlWithDefaults(props).then((newUrl) => {
+      if (!destructorCalled) setUrl(newUrl);
+    });
+    return () => {
+      destructorCalled = true;
+    };
   }, [props]);
 
-  useEffect(() => {
-    mounted.current = true;
-  }, []);
+  if (!url) return null;
 
   return (
     <TileLayer

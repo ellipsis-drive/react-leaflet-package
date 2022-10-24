@@ -61,7 +61,7 @@ function Test() {
         /> */}
 
         {/* BORDERS */}
-        <EllipsisVectorLayer
+        {/* <EllipsisVectorLayer
           pathId="1a24a1ee-7f39-4d21-b149-88df5a3b633a"
           // layerId="45c47c8a-035e-429a-9ace-2dff1956e8d9"
           // style={{
@@ -73,7 +73,7 @@ function Test() {
           fetchInterval={50}
           pageSize={25}
           onFeatureClick={(feature, layer) => console.log(feature)}
-        />
+        /> */}
 
         {/* POINTS TEST */}
         {/* <EllipsisRasterLayer
@@ -91,6 +91,8 @@ function Test() {
           maxTilesInCache={3}
           debug={true}
         /> */}
+        {/* https://api.ellipsis-drive.com/v3/path/2057fd2a-66c5-46ef-9c71-bb8f7a180c44/raster/timestamp/6f4ae070-e084-427c-91d9-e24f97964eca/tile/9/263/167?style=ea97778d-c454-4380-9ef5-94b15985b58e&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiNTM1N2Y0YjktMWRhOC00NDU0LTliNDEtZjE2NmNlMmE4YzNhIiwiaWF0IjoxNjY2NTQ3ODU4LCJleHAiOjE2NjkyMjYyNTh9.wzJQB-mKEVtzhPzSq_Q88puApRcdfwMGqvkpwAZBQVU */}
+        <EllipsisRasterLayer pathId="2057fd2a-66c5-46ef-9c71-bb8f7a180c44" />
       </MapContainer>
     </>
   );

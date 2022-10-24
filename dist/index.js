@@ -21,11 +21,7 @@ Object.defineProperty(exports, "EllipsisVectorLayer", {
     return _EllipsisVectorLayer.default;
   }
 });
-
 var _EllipsisRasterLayer = _interopRequireDefault(require("./EllipsisRasterLayer"));
-
 var _EllipsisVectorLayer = _interopRequireDefault(require("./EllipsisVectorLayer"));
-
 var _ellipsisJsUtil = require("ellipsis-js-util");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
