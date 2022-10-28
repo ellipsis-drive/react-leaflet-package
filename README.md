@@ -51,16 +51,16 @@ useEffect(() => {
 
 | Name                | Description                                                                                  |
 | ------------------- | -------------------------------------------------------------------------------------------- |
-| pathId              | Id of the path                                                                               |
+| pathId              | Id of the path (Only required option)                                                        |
 | timestampId         | Id of the timestamp                                                                          |
 | onFeatureClick      | A function to run on feature click, with as argument the clicked feature                     |
-| maxZoom             | (Optional) maxZoomlevel of the layer. If not specified, use the one specified in layer info. |
-| token               | (Optional) Token of the user                                                                 |
-| style               | (Optional) Id of a style or a style object.                                                  |
-| filter              | (Optional) A property filter to use                                                          |
+| maxZoom             | maxZoomlevel of the layer. If not specified, use the one specified in layer info.            |
+| token               | Token of the user                                                                            |
+| style               | Id of a style or a style object.                                                             |
+| filter              | A property filter to use                                                                     |
 | levelOfDetail       | The level of detail ranging from 1 to 5, or 6 to disable this feature. Default 6.            |
 | levelOfDetailMode   | A string of value 'dynamic' (=default) to change the level of detail with zoom, or 'static'. |
-| levelOfDetailMapper | (Optional) A function that transforms `zoom` to a `levelOfDetail`, used in dynamic mode.     |
+| levelOfDetailMapper | A function that transforms `zoom` to a `levelOfDetail`, used in dynamic mode.                |
 | centerPoints        | Boolean whether to render only center points. Default false.                                 |
 | pageSize            | Size to retreive per step. Default 25, max 3000.                                             |
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb.                                               |
