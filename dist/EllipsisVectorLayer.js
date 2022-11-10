@@ -62,8 +62,7 @@ const EllipsisVectorLayer = props => {
       update(Date.now());
     };
     return base;
-  }, [props]);
-  console.log("rerender");
+  }, [...Object.values(props)]);
 
   //Use new map events if available.
   const _map3x = useMapEvents({
