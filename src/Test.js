@@ -10,6 +10,15 @@ const position = [51.505, -0.09];
 
 function Test() {
   const [loadAll, setLoadAll] = useState(false);
+  const [time, setTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setTime(Date.now());
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [time]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -38,7 +47,7 @@ function Test() {
   return (
     <>
       <h1 style={{ textAlign: "center", margin: "20px" }}>
-        Below is a test of the map.
+        Below is a test of the map. {time}
       </h1>
       <MapContainer
         style={{ height: "70vh", width: "80vw", margin: "0 auto" }}
@@ -91,8 +100,12 @@ function Test() {
           maxTilesInCache={3}
           debug={true}
         /> */}
+        <EllipsisVectorLayer
+          pathId="b8468235-31b5-4959-91a4-0e52a1d4feb6"
+          // loadAll={loadAll}
+        />
         {/* https://api.ellipsis-drive.com/v3/path/2057fd2a-66c5-46ef-9c71-bb8f7a180c44/raster/timestamp/6f4ae070-e084-427c-91d9-e24f97964eca/tile/9/263/167?style=ea97778d-c454-4380-9ef5-94b15985b58e&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiNTM1N2Y0YjktMWRhOC00NDU0LTliNDEtZjE2NmNlMmE4YzNhIiwiaWF0IjoxNjY2NTQ3ODU4LCJleHAiOjE2NjkyMjYyNTh9.wzJQB-mKEVtzhPzSq_Q88puApRcdfwMGqvkpwAZBQVU */}
-        <EllipsisRasterLayer pathId="2057fd2a-66c5-46ef-9c71-bb8f7a180c44" />
+        {/* <EllipsisRasterLayer pathId="2057fd2a-66c5-46ef-9c71-bb8f7a180c44" /> */}
       </MapContainer>
     </>
   );
