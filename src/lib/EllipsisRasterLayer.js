@@ -27,6 +27,7 @@ const EllipsisRasterLayer = (props) => {
       noWrap={true}
       reuseTiles={true}
       maxNativeZoom={props.maxZoom}
+      maxZoom={25}
       format={"image/png"}
     />
   );
