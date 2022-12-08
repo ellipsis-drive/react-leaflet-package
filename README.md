@@ -44,6 +44,7 @@ useEffect(() => {
 | pathId      | id of the path                                      |
 | timestampId | id of the timestamp (optional)                      |
 | style       | id of a style or an object describing it (optional) |
+| zoom       | int to use as max native zoom (optional) |
 | token       | token of the user (optional)                        |
 | mask        | Mask of type multipolygon (optional)                |
 
@@ -54,7 +55,7 @@ useEffect(() => {
 | pathId              | Id of the path (Only required option)                                                        |
 | timestampId         | Id of the timestamp                                                                          |
 | onFeatureClick      | A function to run on feature click, with as argument the clicked feature                     |
-| maxZoom             | maxZoomlevel of the layer. If not specified, use the one specified in layer info.            |
+| zoom             | maxZoomlevel of the layer. If not specified, use the one specified in layer info.            |
 | token               | Token of the user                                                                            |
 | style               | Id of a style or a style object.                                                             |
 | filter              | A property filter to use                                                                     |
