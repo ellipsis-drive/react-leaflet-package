@@ -3,30 +3,30 @@ import { TileLayer } from "react-leaflet";
 import { RasterLayerUtil } from "ellipsis-js-util";
 
 const EllipsisRasterLayer = (props) => {
-  const [url, setUrl] = useState();
+  const [res, setRes] = useState();
 
   useEffect(() => {
     if (!props) return;
     let destructorCalled = false;
 
-    RasterLayerUtil.getSlippyMapUrlWithDefaults(props).then((newUrl) => {
-      if (!destructorCalled) setUrl(newUrl);
+    RasterLayerUtil.getSlippyMapUrlWithDefaults(props).then((res) => {
+      if (!destructorCalled) setRes(res);
     });
     return () => {
       destructorCalled = true;
     };
   }, [props]);
 
-  if (!url) return null;
+  if (!res) return null;
 
   return (
     <TileLayer
-      key={RasterLayerUtil.getLayerId(props)}
-      url={url}
+      key={res.id}
+      url={res.url}
       tileSize={256}
       noWrap={true}
       reuseTiles={true}
-      maxNativeZoom={props.maxZoom}
+      maxNativeZoom={res.zoom}
       maxZoom={25}
       format={"image/png"}
     />

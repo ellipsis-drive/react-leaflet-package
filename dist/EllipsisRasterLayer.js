@@ -24,12 +24,13 @@ const EllipsisRasterLayer = props => {
   }, [props]);
   if (!url) return null;
   return /*#__PURE__*/_react.default.createElement(_reactLeaflet.TileLayer, {
-    key: _ellipsisJsUtil.RasterLayerUtil.getLayerId(props),
+    key: url,
     url: url,
     tileSize: 256,
     noWrap: true,
     reuseTiles: true,
     maxNativeZoom: props.maxZoom,
+    maxZoom: 25,
     format: "image/png"
   });
 };

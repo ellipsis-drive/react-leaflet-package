@@ -2,6 +2,7 @@ import EllipsisRasterLayer from "./lib/EllipsisRasterLayer";
 import EllipsisVectorLayer from "./lib/EllipsisVectorLayer";
 import "./Test.css";
 import "leaflet/dist/leaflet.css";
+import { Slider } from "@mui/material";
 
 import { MapContainer, TileLayer } from "react-leaflet";
 import React, { useEffect, useState } from "react";
@@ -44,22 +45,50 @@ function Test() {
   //   }, 10000);
   // }, [style]);
 
+  let initialStyle = {
+    method: "bandToColor",
+    parameters: {
+      alpha: 1,
+      bandNumber: 1,
+      transitionPoints: [
+        { color: "#68bc00", value: 0 },
+        { color: "#a4dd00", value: 5 },
+        { color: "#dbdf00", value: 10 },
+        { color: "#fcdc00", value: 15 },
+        { color: "#fb9e00", value: 20 },
+        { color: "#d33115", value: 25 },
+        { color: "#fa28ff", value: 30 },
+        { color: "#0062b1", value: 35 },
+        { color: "#009ce0", value: 40 },
+        { color: "#73d8ff", value: 45 },
+      ],
+      period: 45,
+      continuous: true,
+    },
+  };
+
+  const [style, setStyle] = useState(initialStyle);
+
+  const onChagne = (_, e) => {
+    setStyle((prev) => {
+      let x = { ...prev };
+      x.parameters.alpha = e;
+      return x;
+    });
+  };
+
   return (
     <>
       <h1 style={{ textAlign: "center", margin: "20px" }}>
         Below is a test of the map. {time}
       </h1>
+      <Slider min={0} max={1} step={0.1} onChange={onChagne} />
       <MapContainer
         style={{ height: "70vh", width: "80vw", margin: "0 auto" }}
         center={position}
         zoom={13}
         scrollWheelZoom={true}
       >
-        <TileLayer
-          noWrap={true}
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
         {/* <EllipsisVectorLayer
           pathId='b8468235-31b5-4959-91a4-0e52a1d4feb6'
           layerId='44be2542-d20d-457b-b003-698d048d2c6c'
@@ -70,26 +99,10 @@ function Test() {
         /> */}
 
         {/* BORDERS */}
-        {/* <EllipsisVectorLayer
-          pathId="1a24a1ee-7f39-4d21-b149-88df5a3b633a"
-          // layerId="45c47c8a-035e-429a-9ace-2dff1956e8d9"
-          // style={{
-          //   method: "fromColorProperty",
-          //   parameters: { popupProperty: "NAME", defaultColor: "#C75B1C" },
-          // }}
-          loadAll={loadAll}
-          debug={true}
-          fetchInterval={50}
-          pageSize={25}
-          onFeatureClick={(feature, layer) => console.log(feature)}
-        /> */}
+        <EllipsisVectorLayer pathId="1a24a1ee-7f39-4d21-b149-88df5a3b633a" />
 
         {/* POINTS TEST */}
-        {/* <EllipsisRasterLayer
-          blockId='0ec49fb8-f577-45de-8e4f-6243fdc62908'
-          visualizationId='6fde37d3-3666-40ef-b594-890a4e00a2be'
-          captureId={0}
-        /> */}
+        <EllipsisRasterLayer pathId="284e07d0-dd71-439a-bde4-70f8c302d008" />
 
         {/* MEXICO */}
         {/* <EllipsisVectorLayer
@@ -100,12 +113,15 @@ function Test() {
           maxTilesInCache={3}
           debug={true}
         /> */}
-        <EllipsisVectorLayer
-          pathId="b8468235-31b5-4959-91a4-0e52a1d4feb6"
-          // loadAll={loadAll}
-        />
+
         {/* https://api.ellipsis-drive.com/v3/path/2057fd2a-66c5-46ef-9c71-bb8f7a180c44/raster/timestamp/6f4ae070-e084-427c-91d9-e24f97964eca/tile/9/263/167?style=ea97778d-c454-4380-9ef5-94b15985b58e&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiNTM1N2Y0YjktMWRhOC00NDU0LTliNDEtZjE2NmNlMmE4YzNhIiwiaWF0IjoxNjY2NTQ3ODU4LCJleHAiOjE2NjkyMjYyNTh9.wzJQB-mKEVtzhPzSq_Q88puApRcdfwMGqvkpwAZBQVU */}
         {/* <EllipsisRasterLayer pathId="2057fd2a-66c5-46ef-9c71-bb8f7a180c44" /> */}
+
+        <TileLayer
+          noWrap={true}
+          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
       </MapContainer>
     </>
   );
