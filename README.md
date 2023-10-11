@@ -59,15 +59,12 @@ useEffect(() => {
 | token               | Token of the user                                                                            |
 | style               | Id of a style or a style object.                                                             |
 | filter              | A property filter to use                                                                     |
-| levelOfDetail       | The level of detail ranging from 1 to 5, or 6 to disable this feature. Default 6.            |
-| levelOfDetailMode   | A string of value 'dynamic' (=default) to change the level of detail with zoom, or 'static'. |
 | levelOfDetailMapper | A function that transforms `zoom` to a `levelOfDetail`, used in dynamic mode.                |
 | centerPoints        | Boolean whether to render only center points. Default false.                                 |
 | pageSize            | Size to retreive per step. Default 25, max 3000.                                             |
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb.                                               |
-| maxTilesInCache     | The number of tiles to keep in cache. Default 500.                                           |
+| maxRenderTiles     | The number of tiles to keep in cache. Default 500.                                           |
 | maxFeaturesPerTile  | The maximum number of vectors to load per tile. Default 200.                                 |
-| loadAll             | Always load all vectors, even if not visible or far away. Default false                      |
 | fetchInterval       | The interval in ms between finishing a request and starting a new request. Default 0.        |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
