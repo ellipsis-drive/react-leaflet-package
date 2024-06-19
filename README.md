@@ -22,20 +22,17 @@ You can use RasterLayer and VectorLayer within a `<MapContainer />` or `<Map />`
 </MapContainer>
 ```
 
-To login or request metadata of maps you can use the functions available in `EllipsisApi`.
+To request metadata of Ellipsis Drive layers you can use the function available in the `EllipsisApi`.
 
 ```js
 useEffect(() => {
-  EllipsisApi.login(username, password).then((response) => {
-    console.log(response);
-    token = response.token;
-    expires = response.expires;
-  });
   EllipsisApi.getMetadata(mapId).then((response) => {
     console.log(response);
   });
 }, []);
 ```
+
+If the Ellipsis Drive layers you wish to use are not set to public or linksharing you need to create a token for your app. See [https://docs.ellipsis-drive.com/developers/authentication-options]{here} for how to obtain such a token.
 
 #### RasterLayer props
 
@@ -71,23 +68,7 @@ _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeatur
 
 > Any details about the style object are documented in (this documentation)[https://docs.ellipsis-drive.com/developers/api-v3/path-vector/styles/add-style]
 
-### Use the EllipsisApi to login into Ellipsis Drive or view metadata of paths
-
-#### EllipsisApi.login description
-
-**parameters**
-
-| name     | description                                                                                   |
-| -------- | --------------------------------------------------------------------------------------------- |
-| username | The username of your ellipsis-drive account                                                   |
-| password | The password of your ellipsis-drive account                                                   |
-| validFor | (Optional) The number of second the access token will be valid for. Default 86400 (24 hours). |
-
-**return value**
-
-```ts
-token: string; //token to use in other api calls
-expires: number; //expiration time in milliseconds
+### Fetching metadata
 ```
 
 #### EllipsisApi.getPath description
