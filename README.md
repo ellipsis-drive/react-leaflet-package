@@ -45,6 +45,9 @@ If the Ellipsis Drive layers you wish to use are not set to public or linksharin
 | token       | token of the user (optional)                        |
 | mask        | Mask of type multipolygon (optional)                |
 
+
+_note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-raster/styles/add-style).
+
 #### VectorLayer props
 
 | Name                | Description                                                                                  |
@@ -66,7 +69,7 @@ If the Ellipsis Drive layers you wish to use are not set to public or linksharin
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
-> Any details about the style object are documented in (this documentation)[https://docs.ellipsis-drive.com/developers/api-v3/path-vector/styles/add-style]
+_note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-vector/styles/add-style).
 
 ### Fetching metadata
 ```
