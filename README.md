@@ -32,7 +32,7 @@ useEffect(() => {
 }, []);
 ```
 
-If the Ellipsis Drive layers you wish to use are not set to public or linksharing you need to create a token for your app. See [https://docs.ellipsis-drive.com/developers/authentication-options]{here} for how to obtain such a token.
+If the Ellipsis Drive layers you wish to use are not set to public or linksharing you need to create a token for your app. See [here](https://docs.ellipsis-drive.com/developers/authentication-options) for how to obtain such a token.
 
 #### RasterLayer props
 
