@@ -112,7 +112,7 @@ export const EllipsisVectorLayer = (props) => {
   }, [base, getMapBounds]);
 
   const getFeatureId = (feature, index = 0) =>
-    `${feature.properties.id}_${base.levelOfDetail}_${base.getReturnType()}_${
+    `${feature.properties.id}_${base.levelOfDetail}_${
       base.options.styleId ? base.options.styleId : "nostyleid"
     }_${
       base.options.style ? JSON.stringify(base.options.style) : "nostyle"
@@ -133,14 +133,25 @@ export const EllipsisVectorLayer = (props) => {
                 key={getFeatureId(feature)}
                 data={feature}
                 style={feature.properties.compiledStyle}
-                interactive={props.onFeatureClick ? true : false}
+                interactive={
+                  props.onFeatureClick || props.onFeatureHover ? true : false
+                }
                 onEachFeature={
-                  !props.onFeatureClick
+                  !props.onFeatureClick && !props.onFeatureHover
                     ? undefined
-                    : (feature, layer) =>
-                        layer.on("click", () =>
-                          props.onFeatureClick(feature, layer)
-                        )
+                    : (feature, layer) => {
+                        if (props.onFeatureClick) {
+                          layer.on("click", (e) =>
+                            props.onFeatureClick(feature, e)
+                          );
+                        }
+
+                        if (props.onFeatureHover) {
+                          layer.on("mouseover", (e) =>
+                            props.onFeatureHover(feature, e)
+                          );
+                        }
+                      }
                 }
               >
                 <EllipsisPopupProperty feature={feature} />
@@ -157,12 +168,21 @@ export const EllipsisVectorLayer = (props) => {
                 <Marker
                   key={getFeatureId(feature, i)}
                   position={[coordinate[1], coordinate[0]]}
-                  interactive={props.onFeatureClick ? true : false}
-                  onClick={
-                    !props.onFeatureClick
-                      ? undefined
-                      : (e) => props.onFeatureClick(feature, e)
+                  interactive={
+                    props.onFeatureClick || props.onFeatureHover ? true : false
                   }
+                  eventHandlers={{
+                    click: props.onFeatureClick
+                      ? (e) => {
+                          props.onFeatureClick(feature, e);
+                        }
+                      : undefined,
+                    mouseover: props.onFeatureHover
+                      ? (e) => {
+                          props.onFeatureHover(feature, e);
+                        }
+                      : undefined,
+                  }}
                 >
                   <EllipsisPopupProperty feature={feature} />
                 </Marker>
@@ -171,12 +191,21 @@ export const EllipsisVectorLayer = (props) => {
                   key={getFeatureId(feature, i)}
                   center={[coordinate[1], coordinate[0]]}
                   {...feature.properties.compiledStyle}
-                  interactive={props.onFeatureClick ? true : false}
-                  onClick={
-                    !props.onFeatureClick
-                      ? undefined
-                      : (e) => props.onFeatureClick(feature, e)
+                  interactive={
+                    props.onFeatureClick || props.onFeatureHover ? true : false
                   }
+                  eventHandlers={{
+                    click: props.onFeatureClick
+                      ? (e) => {
+                          props.onFeatureClick(feature, e);
+                        }
+                      : undefined,
+                    mouseover: props.onFeatureHover
+                      ? (e) => {
+                          props.onFeatureHover(feature, e);
+                        }
+                      : undefined,
+                  }}
                   pane={"markerPane"}
                 >
                   <EllipsisPopupProperty feature={feature} />

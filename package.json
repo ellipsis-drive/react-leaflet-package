@@ -1,6 +1,6 @@
 {
   "name": "react-leaflet-ellipsis",
-  "version": "3.1.5",
+  "version": "1.9.10",
   "description": "Use Ellipsis Drive layers in leaflet projects.",
   "private": false,
   "keywords": [
@@ -8,16 +8,17 @@
     "Ellipsis Drive",
     "react leaflet"
   ],
-  "main": "build/leaflet-ellipsis.js",
-  "module": "build/leaflet-ellipsis.js",
   "author": "Jelle Keulemans",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "files": [
-    "build",
+    "dist",
     "README.md"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ellipsis-drive/leaflet-package.git"
+    "url": "git+https://github.com/ellipsis-drive/react-leaflet-package.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.15.7",
@@ -28,15 +29,15 @@
     "@testing-library/user-event": "^13.5.0",
     "babel-cli": "^6.26.0",
     "ellipsis-js-util": "file:../ellipsis-js-util",
-    "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-leaflet": "^4.2.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "ellipsis-js-util": "^1.3.9"
+    "ellipsis-js-util": "^1.3.9",
+    "react-leaflet": "^4.2.1",
+    "react": "^18.3.1"
   },
   "scripts": {
     "start": "react-scripts start",
