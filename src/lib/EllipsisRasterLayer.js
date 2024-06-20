@@ -31,7 +31,6 @@ const EllipsisRasterLayer = ({
   }, [pathId, timestampId, style, zoom, token, mask]);
 
   if (!res) return null;
-  console.log(res);
 
   return (
     <TileLayer

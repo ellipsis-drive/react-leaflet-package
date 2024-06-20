@@ -24,4 +24,4 @@ Object.defineProperty(exports, "EllipsisVectorLayer", {
 var _EllipsisRasterLayer = _interopRequireDefault(require("./EllipsisRasterLayer"));
 var _EllipsisVectorLayer = _interopRequireDefault(require("./EllipsisVectorLayer"));
 var _ellipsisJsUtil = require("ellipsis-js-util");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }

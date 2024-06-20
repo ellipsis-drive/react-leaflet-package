@@ -1,33 +1,47 @@
 {
   "name": "react-leaflet-ellipsis",
-  "description": "Use Ellipsis Drive layers as react-leaflet components",
-  "contributors": [
-    "Jelle Keulemans",
-    "Daniel van der Maas"
-  ],
+  "version": "3.1.5",
+  "description": "Use Ellipsis Drive layers in leaflet projects.",
+  "private": false,
   "keywords": [
     "Ellipsis",
     "Ellipsis Drive",
     "react leaflet"
   ],
-  "version": "1.9.4",
-  "private": false,
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "build/leaflet-ellipsis.js",
+  "module": "build/leaflet-ellipsis.js",
+  "author": "Jelle Keulemans",
   "files": [
-    "dist",
+    "build",
     "README.md"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ellipsis-drive-internal/react-leaflet-package.git"
+    "url": "git+https://github.com/ellipsis-drive/leaflet-package.git"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "babel-cli": "^6.26.0",
+    "ellipsis-js-util": "file:../ellipsis-js-util",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "ellipsis-js-util": "^1.3.9"
   },
   "scripts": {
     "start": "react-scripts start",
-    "test": "react-scripts test",
-    "windowsBuild": "rm -rf dist && babel src/lib --out-dir dist --copy-files",
     "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files",
+    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -36,27 +50,16 @@
       "react-app/jest"
     ]
   },
-  "dependencies": {
-    "core-js": "^3.18.3",
-    "ellipsis-js-util": "file:../ellipsis-js-util"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.15.7",
-    "@babel/core": "^7.15.8",
-    "@babel/preset-env": "^7.15.8",
-    "babel-cli": "^6.26.0",
-    "leaflet": "^1.7.1",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-leaflet": "^3.2.1",
-    "react-scripts": "4.0.3"
-  },
-  "peerDependencies": {
-    "react-leaflet": "*"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ]
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

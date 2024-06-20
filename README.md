@@ -41,36 +41,36 @@ If the Ellipsis Drive layers you wish to use are not set to public or linksharin
 | pathId      | id of the path                                      |
 | timestampId | id of the timestamp (optional)                      |
 | style       | id of a style or an object describing it (optional) |
-| zoom       | int to use as max native zoom (optional) |
+| zoom        | int to use as max native zoom (optional)            |
 | token       | token of the user (optional)                        |
 | mask        | Mask of type multipolygon (optional)                |
-
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-raster/styles/add-style).
 
 #### VectorLayer props
 
-| Name                | Description                                                                                  |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| pathId              | Id of the path (Only required option)                                                        |
-| timestampId         | Id of the timestamp                                                                          |
-| onFeatureClick      | A function to run on feature click, with as argument the clicked feature                     |
-| zoom             | maxZoomlevel of the layer. If not specified, use the one specified in layer info.            |
-| token               | Token of the user                                                                            |
-| style               | Id of a style or a style object.                                                             |
-| filter              | A property filter to use                                                                     |
-| pageSize            | Size to retreive per step. Default 25, max 3000.                                             |
-| maxMbPerTile        | The maximum mb to load per tile. Default 16mb.                                               |
-| maxRenderTiles     | The number of tiles to keep in cache. Default 500.                                           |
-| maxFeaturesPerTile  | The maximum number of vectors to load per tile. Default 200.                                 |
-| fetchInterval       | The interval in ms between finishing a request and starting a new request. Default 0.        |
-| loadAll      | Boolean whehter to keep loading features indefinitely. Default false.   |
+| Name               | Description                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| pathId             | Id of the path (Only required option)                                                 |
+| timestampId        | Id of the timestamp                                                                   |
+| onFeatureClick     | A function to run on feature click, with as argument the clicked feature              |
+| zoom               | maxZoomlevel of the layer. If not specified, use the one specified in layer info.     |
+| token              | Token of the user                                                                     |
+| style              | Id of a style or a style object.                                                      |
+| filter             | A property filter to use                                                              |
+| pageSize           | Size to retreive per step. Default 25, max 3000.                                      |
+| maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                                        |
+| maxRenderTiles     | The number of tiles to keep in cache. Default 500.                                    |
+| maxFeaturesPerTile | The maximum number of vectors to load per tile. Default 200.                          |
+| fetchInterval      | The interval in ms between finishing a request and starting a new request. Default 0. |
+| loadAll            | Boolean whehter to keep loading features indefinitely. Default false.                 |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-vector/styles/add-style).
 
 ### Fetching metadata
+
 ```
 
 #### EllipsisApi.getPath description
@@ -84,3 +84,4 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 
 **return value**
 It returns JSON, which depends on the type of the specified object.
+```
