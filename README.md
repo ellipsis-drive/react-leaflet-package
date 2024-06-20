@@ -63,7 +63,6 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                                        |
 | maxRenderTiles     | The number of tiles to keep in cache. Default 500.                                    |
 | maxFeaturesPerTile | The maximum number of vectors to load per tile. Default 200.                          |
-| fetchInterval      | The interval in ms between finishing a request and starting a new request. Default 0. |
 | loadAll            | Boolean whehter to keep loading features indefinitely. Default false.                 |
 | usMarkers            | Boolean whehter to use markers for points, default false.                 |
 
