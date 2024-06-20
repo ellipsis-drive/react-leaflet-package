@@ -59,8 +59,6 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | token               | Token of the user                                                                            |
 | style               | Id of a style or a style object.                                                             |
 | filter              | A property filter to use                                                                     |
-| levelOfDetailMapper | A function that transforms `zoom` to a `levelOfDetail`, used in dynamic mode.                |
-| centerPoints        | Boolean whether to render only center points. Default false.                                 |
 | pageSize            | Size to retreive per step. Default 25, max 3000.                                             |
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb.                                               |
 | maxRenderTiles     | The number of tiles to keep in cache. Default 500.                                           |
