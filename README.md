@@ -53,7 +53,8 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | ------------------ | ------------------------------------------------------------------------------------- |
 | pathId             | Id of the path (Only required option)                                                 |
 | timestampId        | Id of the timestamp                                                                   |
-| onFeatureClick     | A function to run on feature click, with as argument the clicked feature              |
+| onFeatureClick     | A function to run on feature click, with as argument the clicked feature and the event              |
+| onFeatureHover     | A function to run on feature hover, with as argument the clicked feature and the event              |
 | zoom               | maxZoomlevel of the layer. If not specified, use the one specified in layer info.     |
 | token              | Token of the user                                                                     |
 | style              | Id of a style or a style object.                                                      |
@@ -64,6 +65,7 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | maxFeaturesPerTile | The maximum number of vectors to load per tile. Default 200.                          |
 | fetchInterval      | The interval in ms between finishing a request and starting a new request. Default 0. |
 | loadAll            | Boolean whehter to keep loading features indefinitely. Default false.                 |
+| usMarkers            | Boolean whehter to use markers for points, default false.                 |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
