@@ -41,15 +41,7 @@ export const EllipsisVectorLayer = (props) => {
   const baseUpdateFunction = useRef();
   const base = useMemo(() => {
     const base = new VectorLayerUtil.EllipsisVectorLayerBase({ ...props });
-    base.loadOptions.styleKeys = {
-      radius: [],
-      weight: ["width"],
-      color: ["borderColor"],
-      opacity: ["borderOpacity"],
-      fillColor: [],
-      fillOpacity: [],
-      popupProperty: [],
-    };
+
     baseUpdateFunction.current = base.update;
     base.updateView = () => {
       update(Date.now());
@@ -121,7 +113,6 @@ export const EllipsisVectorLayer = (props) => {
   const render = () => {
     const features = base.getFeatures();
     if (!features.length) return <></>;
-
     return (
       <>
         {features.flatMap((feature) => {

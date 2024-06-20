@@ -11,6 +11,24 @@ import React, { useEffect, useState } from "react";
 const position = [51.505, -0.09];
 
 function App() {
+  const style = {
+    id: "648674a6-afd5-445c-940e-6816503da0e9",
+    pathId: "fb64d613-c100-471d-933c-51d63841f0de",
+    name: "Default style",
+    default: true,
+    method: "fromColorProperty",
+    parameters: {
+      alpha: 0,
+      width: 2,
+      radius: { method: "constant", parameters: { value: 2.121320343559643 } },
+      defaultColor: "#c75b1c",
+      custom: true,
+    },
+    tempId: 0,
+    version: 1,
+    custom: true,
+  };
+
   return (
     <>
       <h1 style={{ textAlign: "center", margin: "20px" }}>
@@ -24,13 +42,9 @@ function App() {
         scrollWheelZoom={true}
       >
         <EllipsisVectorLayer
-          pathId="3bb84f08-c885-4809-a3a3-3204c924c676"
-          maxFeaturesPerTile={1000}
-          pageSize={30}
-          loadAll={true}
-          onFeatureHover={(f, e) => {
-            console.log(f, e);
-          }}
+          pathId="fb64d613-c100-471d-933c-51d63841f0de"
+          style={style}
+          onFeatureHover={(f, e) => {}}
         />
 
         <TileLayer
