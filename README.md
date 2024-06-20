@@ -55,7 +55,7 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | timestampId        | Id of the timestamp                                                                   |
 | onFeatureClick     | A function to run on feature click, with as argument the clicked feature and the event              |
 | onFeatureHover     | A function to run on feature hover, with as argument the clicked feature and the event              |
-| zoom               | maxZoomlevel of the layer. If not specified, use the one specified in layer info.     |
+| zoom               | max native zoomlevel of the layer. If not specified, use the one specified in layer info.     |
 | token              | Token of the user                                                                     |
 | style              | Id of a style or a style object.                                                      |
 | filter             | A property filter to use                                                              |
