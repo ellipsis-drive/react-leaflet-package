@@ -41,7 +41,7 @@ If the Ellipsis Drive layers you wish to use are not set to public or linksharin
 | pathId      | id of the path                                      |
 | timestampId | id of the timestamp (optional)                      |
 | style       | id of a style or an object describing it (optional) |
-| zoom        | int to use as max native zoom (optional)            |
+| maxNativeZoom        | int to use as max native zoom (optional)            |
 | token       | token of the user (optional)                        |
 | mask        | Mask of type multipolygon (optional)                |
 
